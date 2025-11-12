@@ -1,0 +1,318 @@
+"use client";
+import React, { useState } from "react";
+import HomeHeader from "@/component/navber";
+import { Button } from "@/component/ui/button";
+import { Input } from "@/component/ui/input";
+import { 
+  Search, 
+  MapPin, 
+  Clock, 
+  Users, 
+  Star, 
+  Briefcase, 
+  Filter,
+  ExternalLink,
+  DollarSign
+} from "lucide-react";
+
+const jobs = [
+  {
+    id: 1,
+    title: "Junior Web Developer",
+    company: "TechStart Bangladesh",
+    location: "Dhaka, Bangladesh",
+    type: "Full-time",
+    experience: "Entry Level",
+    salary: "৳25,000-35,000/month",
+    requiredSkills: ["JavaScript", "React", "HTML", "CSS"],
+    description: "Join our growing team to build modern web applications using React and Node.js.",
+    posted: "2 days ago",
+    applications: 45,
+    remote: false,
+  },
+  {
+    id: 2,
+    title: "Digital Marketing Intern",
+    company: "Growth Labs",
+    location: "Remote",
+    type: "Internship",
+    experience: "Fresher",
+    salary: "৳15,000-20,000/month",
+    requiredSkills: ["Social Media", "Content Writing", "Analytics", "Communication"],
+    description: "Learn digital marketing strategies while working on real campaigns for clients.",
+    posted: "1 day ago",
+    applications: 32,
+    remote: true,
+  },
+  {
+    id: 3,
+    title: "Data Analyst",
+    company: "DataCorp Ltd",
+    location: "Chittagong, Bangladesh",
+    type: "Part-time",
+    experience: "Junior",
+    salary: "৳30,000-40,000/month",
+    requiredSkills: ["Excel", "Python", "SQL", "Statistics"],
+    description: "Analyze business data to provide insights and recommendations for decision making.",
+    posted: "3 days ago",
+    applications: 28,
+    remote: false,
+  },
+  {
+    id: 4,
+    title: "UI/UX Designer",
+    company: "Design Studio Pro",
+    location: "Sylhet, Bangladesh",
+    type: "Freelance",
+    experience: "Mid",
+    salary: "৳500-800/hour",
+    requiredSkills: ["Figma", "Adobe XD", "Photoshop", "User Research"],
+    description: "Create beautiful and functional user interfaces for mobile and web applications.",
+    posted: "5 days ago",
+    applications: 52,
+    remote: true,
+  },
+  {
+    id: 5,
+    title: "Content Writer",
+    company: "Media House BD",
+    location: "Dhaka, Bangladesh",
+    type: "Full-time",
+    experience: "Entry Level",
+    salary: "৳20,000-25,000/month",
+    requiredSkills: ["Writing", "SEO", "Research", "English"],
+    description: "Write engaging content for websites, blogs, and social media platforms.",
+    posted: "1 week ago",
+    applications: 67,
+    remote: false,
+  },
+];
+
+export default function JobsPage() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedType, setSelectedType] = useState("all");
+  const [selectedExperience, setSelectedExperience] = useState("all");
+  const [sortBy, setSortBy] = useState("recent");
+
+  const jobTypes = ["all", "Full-time", "Part-time", "Internship", "Freelance"];
+  const experienceLevels = ["all", "Fresher", "Entry Level", "Junior", "Mid"];
+
+  const filteredJobs = jobs
+    .filter(job => 
+      job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.requiredSkills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()))
+    )
+    .filter(job => 
+      selectedType === "all" || job.type === selectedType
+    )
+    .filter(job => 
+      selectedExperience === "all" || job.experience === selectedExperience
+    )
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "recent":
+          return new Date(b.posted).getTime() - new Date(a.posted).getTime();
+        case "applications":
+          return b.applications - a.applications;
+        default:
+          return 0;
+      }
+    });
+
+  const getMatchingSkills = (job: typeof jobs[0], userSkills: string[] = ["JavaScript", "Communication"]) => {
+    return job.requiredSkills.filter(skill => 
+      userSkills.some(userSkill => 
+        skill.toLowerCase().includes(userSkill.toLowerCase())
+      )
+    );
+  };
+
+  return (
+    <>
+      <HomeHeader />
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              Find Your Next Opportunity
+            </h1>
+            <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+              Discover jobs that match your skills and career goals. Start building your future today.
+            </p>
+          </div>
+
+          {/* Search and Filters */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <Input
+                  type="text"
+                  placeholder="Search jobs, companies, or skills..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              
+              <select
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value)}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700"
+              >
+                {jobTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type === "all" ? "All Types" : type}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={selectedExperience}
+                onChange={(e) => setSelectedExperience(e.target.value)}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700"
+              >
+                {experienceLevels.map((level) => (
+                  <option key={level} value={level}>
+                    {level === "all" ? "All Levels" : level}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700"
+              >
+                <option value="recent">Most Recent</option>
+                <option value="applications">Most Applied</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Results Count */}
+          <div className="mb-6">
+            <p className="text-gray-600 dark:text-gray-400">
+              Found {filteredJobs.length} jobs matching your criteria
+            </p>
+          </div>
+
+          {/* Job Listings */}
+          <div className="space-y-6">
+            {filteredJobs.map((job) => {
+              const matchingSkills = getMatchingSkills(job);
+              return (
+                <div
+                  key={job.id}
+                  className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow p-6"
+                >
+                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between mb-4">
+                        <div>
+                          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                            {job.title}
+                          </h3>
+                          <p className="text-lg text-blue-600 dark:text-blue-400 mb-2">
+                            {job.company}
+                          </p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          {job.remote && (
+                            <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                              Remote
+                            </span>
+                          )}
+                          <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                            {job.type}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-4 mb-4 text-sm text-gray-600 dark:text-gray-400">
+                        <div className="flex items-center">
+                          <MapPin className="h-4 w-4 mr-1" />
+                          {job.location}
+                        </div>
+                        <div className="flex items-center">
+                          <Briefcase className="h-4 w-4 mr-1" />
+                          {job.experience}
+                        </div>
+                        <div className="flex items-center">
+                          <DollarSign className="h-4 w-4 mr-1" />
+                          {job.salary}
+                        </div>
+                        <div className="flex items-center">
+                          <Clock className="h-4 w-4 mr-1" />
+                          {job.posted}
+                        </div>
+                        <div className="flex items-center">
+                          <Users className="h-4 w-4 mr-1" />
+                          {job.applications} applications
+                        </div>
+                      </div>
+
+                      <p className="text-gray-700 dark:text-gray-300 mb-4">
+                        {job.description}
+                      </p>
+
+                      <div className="mb-4">
+                        <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+                          Required Skills:
+                        </h4>
+                        <div className="flex flex-wrap gap-2">
+                          {job.requiredSkills.map((skill, index) => (
+                            <span
+                              key={index}
+                              className={`px-3 py-1 text-xs rounded-full ${
+                                matchingSkills.includes(skill)
+                                  ? "bg-green-100 text-green-800 border border-green-300"
+                                  : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                              }`}
+                            >
+                              {skill}
+                              {matchingSkills.includes(skill) && " ✓"}
+                            </span>
+                          ))}
+                        </div>
+                        {matchingSkills.length > 0 && (
+                          <p className="text-sm text-green-600 mt-2">
+                            ✓ You match {matchingSkills.length} required skills
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="lg:ml-6 flex flex-col space-y-2">
+                      <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                        Apply Now
+                        <ExternalLink className="ml-2 h-4 w-4" />
+                      </Button>
+                      <Button variant="outline">
+                        Save Job
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {filteredJobs.length === 0 && (
+            <div className="text-center py-12">
+              <Briefcase className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                No jobs found
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Try adjusting your search criteria or check back later for new opportunities.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
