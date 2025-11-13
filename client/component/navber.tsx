@@ -2,7 +2,7 @@
 import { useMediaQuery } from "@/hooks/use-media-query";
 import ThemeSwitch from "@/lib/theme";
 import { cn } from "@/lib/utils";
-import { AlignJustify, X, Briefcase, BookOpen, User, Twitter, TrendingUp, LogOut } from "lucide-react";
+import { AlignJustify, X, Briefcase, BookOpen, User, Twitter, TrendingUp, LogOut, LayoutDashboard, Plus } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -24,11 +24,23 @@ export default function HomeHeader({}: HomeHeaderProps) {
     router.push("/");
   };
 
-  const navItems = [
+  // Base nav items for all users
+  const baseNavItems = [
     { href: "/jobs", label: "Find Jobs", icon: Briefcase },
     { href: "/resources", label: "Learning Resources", icon: BookOpen },
-    // { href: "/profile", label: "Profile", icon: User },
   ];
+
+  // Add role-specific nav items
+  const navItems = isAuthenticated 
+    ? [
+        { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+        ...baseNavItems,
+        ...(user?.role === 'POSTER' || user?.role === 'ADMIN' 
+          ? [{ href: "/post-job", label: "Post Job", icon: Plus }] 
+          : []
+        ),
+      ]
+    : baseNavItems;
   return (
     <header className="w-full top-0 z-10 absolute lg:z-10 lg:flex lg:items-center lg:px-8 lg:py-0 text-primary-foreground">
       <div className="flex md:max-w-screen-lg mx-auto w-full items-center relative justify-between  h-16 px-4  p-2 bg-white border dark:border-neutral-800 border-neutral-200   rounded-b-xl  dark:bg-zinc-950">
@@ -73,11 +85,36 @@ export default function HomeHeader({}: HomeHeaderProps) {
                         pathname.startsWith(item.href) &&
                           "dark:text-blue-200 dark:border dark:border-blue-950 text-base-blue dark:bg-neutral-900 bg-neutral-200",
                       )}
+                      onClick={() => setIsOpen(false)}
                     >
                       <item.icon size={20} />
                       <span>{item.label}</span>
                     </Link>
                   ))}
+                  
+                  {/* User Info in Mobile Menu */}
+                  {isAuthenticated && user && (
+                    <div className="mt-auto pt-4 border-t dark:border-neutral-800 border-neutral-200">
+                      <div className="p-2 bg-neutral-100 dark:bg-neutral-900 rounded-md mb-2">
+                        <p className="text-sm font-medium">{user.fullName}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">{user.email}</p>
+                        <span className="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded mt-1 inline-block">
+                          {user.role}
+                        </span>
+                      </div>
+                      <Button
+                        onClick={() => {
+                          handleLogout();
+                          setIsOpen(false);
+                        }}
+                        variant="outline"
+                        className="w-full gap-2"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Logout
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </Drawer.Content>
             </Drawer.Portal>
@@ -125,13 +162,18 @@ export default function HomeHeader({}: HomeHeaderProps) {
           />
           {isAuthenticated ? (
             <>
-                <Link
+              <Link
                 href="/profile"
                 className="flex items-center gap-2 px-3 h-10 border dark:border-neutral-800 border-neutral-200 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors"
-                >
+              >
                 <User className="h-4 w-4" />
                 <span className="text-sm hidden md:inline">{user?.fullName || "User"}</span>
-                </Link>
+                {user?.role && (
+                  <span className="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded hidden lg:inline">
+                    {user.role}
+                  </span>
+                )}
+              </Link>
               <Button
                 onClick={handleLogout}
                 variant="outline"
@@ -147,7 +189,7 @@ export default function HomeHeader({}: HomeHeaderProps) {
                 href="/login"
                 className="bg-[#334cec] text-white border dark:border-neutral-800 border-neutral-200 h-10 items-center flex justify-center px-3 rounded-md"
               >
-                Get Start
+                Get Started
               </Link>
             </>
           )}

@@ -19,6 +19,7 @@ const signupSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address").optional().or(z.literal("")),
   phone: z.string().optional().or(z.literal("")),
+  role: z.enum(['SEEKER', 'POSTER']),
   password: z.string()
     .min(8, "Password must be at least 8 characters")
     .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, 
@@ -111,10 +112,14 @@ export default function SignupPage() {
     resolver: zodResolver(signupSchema),
     defaultValues: {
       agreeToTerms: false,
+      role: 'SEEKER',
+      email: '',
+      phone: '',
     }
   });
 
   const password = watch("password");
+  const role = watch("role");
 
   const onSubmit = async (data: SignupFormData) => {
     setError("");
@@ -123,6 +128,7 @@ export default function SignupPage() {
       const registerData: any = {
         fullName: data.fullName,
         password: data.password,
+        role: data.role || 'SEEKER',
       };
 
       // Add fields only if they have values
@@ -192,6 +198,48 @@ export default function SignupPage() {
               />
               {errors.fullName && (
                 <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.fullName.message}</p>
+              )}
+            </div>
+
+            {/* Role Selection */}
+            <div>
+              <Label htmlFor="role">I am a *</Label>
+              <div className="grid grid-cols-2 gap-4 mt-2">
+                <button
+                  type="button"
+                  onClick={() => setValue("role", "SEEKER")}
+                  className={cn(
+                    "p-4 border-2 rounded-lg flex flex-col items-center gap-2 transition-all",
+                    role === "SEEKER" 
+                      ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20" 
+                      : "border-gray-300 dark:border-gray-600 hover:border-gray-400"
+                  )}
+                >
+                  <Briefcase className="h-6 w-6" />
+                  <span className="font-medium">Job Seeker</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                    Looking for opportunities
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setValue("role", "POSTER")}
+                  className={cn(
+                    "p-4 border-2 rounded-lg flex flex-col items-center gap-2 transition-all",
+                    role === "POSTER" 
+                      ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20" 
+                      : "border-gray-300 dark:border-gray-600 hover:border-gray-400"
+                  )}
+                >
+                  <Target className="h-6 w-6" />
+                  <span className="font-medium">Job Poster</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                    Posting job opportunities
+                  </span>
+                </button>
+              </div>
+              {errors.role && (
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.role.message}</p>
               )}
             </div>
 

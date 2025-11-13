@@ -9,6 +9,7 @@ const registerSchema = z.object({
   phone: z.string().min(10, 'Invalid phone number').optional(),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   fullName: z.string().min(1, 'Full name is required'),
+  role: z.enum(['SEEKER', 'POSTER']).optional().default('SEEKER'),
   educationLevel: z.string().optional(),
   department: z.string().optional(),
   experienceLevel: z.enum(['Fresher', 'Junior', 'Mid', 'Senior']).optional(),

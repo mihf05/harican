@@ -9,7 +9,7 @@ import { Input } from "@/component/ui/input";
 import { Label } from "@/component/ui/label";
 import { PhoneInput } from "@/component/ui/phone-input";
 import { cn } from "@/lib/utils";
-import { User, Mail, Phone, GraduationCap, Briefcase, Award, Edit3, Save, X, Plus, Trash2 } from "lucide-react";
+import { User, Mail, Phone, GraduationCap, Briefcase, Award, Edit3, Save, X, Plus, Trash2, FileText, Upload } from "lucide-react";
 import type { Skill } from "@/lib/api";
 
 export default function ProfilePage() {
@@ -27,6 +27,7 @@ export default function ProfilePage() {
     department: string;
     experienceLevel: 'Fresher' | 'Junior' | 'Mid' | 'Senior';
     preferredCareerTrack: string;
+    cvText: string;
   }>({
     fullName: "",
     email: "",
@@ -36,6 +37,7 @@ export default function ProfilePage() {
     department: "",
     experienceLevel: "Fresher",
     preferredCareerTrack: "",
+    cvText: "",
   });
 
   useEffect(() => {
@@ -49,6 +51,7 @@ export default function ProfilePage() {
         department: user.department || "",
         experienceLevel: user.experienceLevel || "Fresher",
         preferredCareerTrack: user.preferredCareerTrack || "",
+        cvText: user.cvText || "",
       });
     }
   }, [user]);
@@ -108,6 +111,7 @@ export default function ProfilePage() {
         department: user.department || "",
         experienceLevel: user.experienceLevel || "Fresher",
         preferredCareerTrack: user.preferredCareerTrack || "",
+        cvText: user.cvText || "",
       });
     }
     setIsEditing(false);
@@ -313,6 +317,60 @@ export default function ProfilePage() {
                   )}
                 </div>
               </div>
+            </div>
+
+            {/* CV / Resume Section */}
+            <div className="mt-6 space-y-4">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                CV / Resume
+                <span className="text-xs font-normal text-gray-500 dark:text-gray-400 ml-2">
+                  (For AI-powered job matching)
+                </span>
+              </h2>
+
+              <div>
+                <Label htmlFor="cvText">CV Text</Label>
+                {isEditing ? (
+                  <div className="space-y-2">
+                    <textarea
+                      id="cvText"
+                      value={profileData.cvText}
+                      onChange={(e) => setProfileData({ ...profileData, cvText: e.target.value })}
+                      placeholder="Paste your CV text here for AI analysis...&#10;&#10;Include your work experience, education, skills, projects, certifications, and achievements."
+                      rows={10}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 resize-y"
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      💡 Tip: Paste your full CV text or upload a file below. Our AI will analyze it to match you with relevant jobs and resources.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="mt-1 text-sm text-gray-900 dark:text-gray-100 py-2 px-3 bg-gray-50 dark:bg-gray-700 rounded-md max-h-60 overflow-y-auto">
+                    {user?.cvText ? (
+                      <pre className="whitespace-pre-wrap font-sans">{user.cvText}</pre>
+                    ) : (
+                      <p className="text-gray-500 dark:text-gray-400 italic">No CV text added yet</p>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {isEditing && (
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <Upload className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+                    <div className="flex-1">
+                      <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
+                        Upload CV File (Coming Soon)
+                      </h4>
+                      <p className="text-xs text-blue-700 dark:text-blue-300">
+                        File upload for PDF/DOCX will be available in the next update. For now, please paste your CV text above.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

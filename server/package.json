@@ -9,7 +9,7 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
-    "db:seed": "node src/scripts/seed.js"
+    "db:seed": "node prisma/seed.js"
   },
   "dependencies": {
     "@prisma/client": "^5.7.0",
@@ -40,5 +40,8 @@
     "hackathon"
   ],
   "author": "Your Team",
-  "license": "MIT"
+  "license": "MIT",
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  }
 }

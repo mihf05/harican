@@ -31,6 +31,52 @@ export interface Skill {
   createdAt: string;
 }
 
+export interface Job {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  isRemote: boolean;
+  jobType: 'Internship' | 'Part-time' | 'Full-time' | 'Freelance';
+  experienceLevel: 'Fresher' | 'Junior' | 'Mid' | 'Senior';
+  description?: string;
+  requirements: string[];
+  skills: string[];
+  salary?: string;
+  applicationUrl?: string;
+  postedById?: string;
+  createdAt: string;
+  updatedAt: string;
+  isActive: boolean;
+  matchScore?: number;
+  matchedSkills?: string[];
+  matchReason?: string;
+  postedBy?: {
+    id: string;
+    fullName: string;
+    email?: string;
+  };
+}
+
+export interface LearningResource {
+  id: string;
+  title: string;
+  platform: string;
+  url: string;
+  description?: string;
+  skills: string[];
+  costType: 'Free' | 'Paid';
+  duration?: string;
+  level?: 'Beginner' | 'Intermediate' | 'Advanced';
+  rating?: number;
+  createdAt: string;
+  updatedAt: string;
+  isActive: boolean;
+  matchScore?: number;
+  matchedSkills?: string[];
+  matchReason?: string;
+}
+
 export interface ApiResponse<T = any> {
   success: boolean;
   message?: string;
@@ -49,6 +95,7 @@ export interface RegisterData {
   phone?: string;
   password: string;
   fullName: string;
+  role?: 'SEEKER' | 'POSTER';
   educationLevel?: string;
   department?: string;
   experienceLevel?: 'Fresher' | 'Junior' | 'Mid' | 'Senior';
@@ -233,8 +280,136 @@ export const profileAPI = {
   },
 };
 
+// Jobs API
+export const jobsAPI = {
+  // Get all jobs with filters
+  async getJobs(params?: {
+    jobType?: string;
+    experienceLevel?: string;
+    location?: string;
+    isRemote?: boolean;
+    skills?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<ApiResponse<Job[]>> {
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, String(value));
+        }
+      });
+    }
+    const queryString = queryParams.toString();
+    return apiRequest<Job[]>(`/api/jobs${queryString ? `?${queryString}` : ''}`);
+  },
+
+  // Get job by ID
+  async getJobById(id: string): Promise<ApiResponse<Job>> {
+    return apiRequest<Job>(`/api/jobs/${id}`);
+  },
+
+  // Get recommended jobs
+  async getRecommendedJobs(): Promise<ApiResponse<Job[]>> {
+    return apiRequest<Job[]>('/api/jobs/recommended/me');
+  },
+
+  // Create job (POSTER/ADMIN only)
+  async createJob(data: Partial<Job>): Promise<ApiResponse<Job>> {
+    return apiRequest<Job>('/api/jobs', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  // Update job (POSTER/ADMIN only)
+  async updateJob(id: string, data: Partial<Job>): Promise<ApiResponse<Job>> {
+    return apiRequest<Job>(`/api/jobs/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  // Delete job (POSTER/ADMIN only)
+  async deleteJob(id: string): Promise<ApiResponse> {
+    return apiRequest(`/api/jobs/${id}`, {
+      method: 'DELETE',
+    });
+  },
+};
+
+// Resources API
+export const resourcesAPI = {
+  // Get all resources with filters
+  async getResources(params?: {
+    costType?: string;
+    level?: string;
+    platform?: string;
+    skills?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<ApiResponse<LearningResource[]>> {
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, String(value));
+        }
+      });
+    }
+    const queryString = queryParams.toString();
+    return apiRequest<LearningResource[]>(`/api/resources${queryString ? `?${queryString}` : ''}`);
+  },
+
+  // Get resource by ID
+  async getResourceById(id: string): Promise<ApiResponse<LearningResource>> {
+    return apiRequest<LearningResource>(`/api/resources/${id}`);
+  },
+
+  // Get recommended resources
+  async getRecommendedResources(): Promise<ApiResponse<LearningResource[]>> {
+    return apiRequest<LearningResource[]>('/api/resources/recommended/me');
+  },
+
+  // Create resource (ADMIN only)
+  async createResource(data: Partial<LearningResource>): Promise<ApiResponse<LearningResource>> {
+    return apiRequest<LearningResource>('/api/resources', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  // Update resource (ADMIN only)
+  async updateResource(id: string, data: Partial<LearningResource>): Promise<ApiResponse<LearningResource>> {
+    return apiRequest<LearningResource>(`/api/resources/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  // Delete resource (ADMIN only)
+  async deleteResource(id: string): Promise<ApiResponse> {
+    return apiRequest(`/api/resources/${id}`, {
+      method: 'DELETE',
+    });
+  },
+};
+
+// Dashboard API
+export const dashboardAPI = {
+  // Get dashboard data
+  async getDashboard(): Promise<ApiResponse<any>> {
+    return apiRequest('/api/dashboard');
+  },
+};
+
 // Export everything
 export default {
   auth: authAPI,
   profile: profileAPI,
+  jobs: jobsAPI,
+  resources: resourcesAPI,
+  dashboard: dashboardAPI,
 };

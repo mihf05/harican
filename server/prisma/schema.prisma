@@ -11,9 +11,9 @@ datasource db {
 }
 
 enum UserRole {
-  USER
+  SEEKER
+  POSTER
   ADMIN
-  EMPLOYER
 }
 
 model User {
@@ -24,7 +24,7 @@ model User {
   emailVerified Boolean @default(false)
   phoneVerified Boolean @default(false)
   fullName    String
-  role        UserRole @default(USER)
+  role        UserRole @default(SEEKER)
   educationLevel String?
   department  String?
   experienceLevel String? // Fresher, Junior, Mid
@@ -40,6 +40,7 @@ model User {
   // Relations
   skills      UserSkill[]
   verifications Verification[]
+  postedJobs  Job[]
 
   @@map("users")
 }
@@ -87,9 +88,12 @@ model Job {
   skills      String[]
   salary      String?
   applicationUrl String?
+  postedById  String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   isActive    Boolean  @default(true)
+
+  postedBy User? @relation(fields: [postedById], references: [id], onDelete: SetNull)
 
   @@map("jobs")
 }
