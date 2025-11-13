@@ -1,21 +1,50 @@
 "use client";
 import { Button } from "@/component/ui/button";
 import { cn } from "@/lib/utils";
-import { BookOpen, Eye, EyeOff } from "lucide-react";
+import { BookOpen, Eye, EyeOff, Mail, Phone } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { authAPI } from "@/lib/api";
+import { PhoneInput } from "@/component/ui/phone-input";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [contactMethod, setContactMethod] = useState<"email" | "phone">("email");
   const [formData, setFormData] = useState({
     email: "",
+    phone: "",
     password: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log("Login data:", formData);
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const response = await authAPI.login({
+        ...(contactMethod === "email" ? { email: formData.email } : { phone: formData.phone }),
+        password: formData.password,
+      });
+
+      if (response.success) {
+        // Check if phone verification is needed
+        if (response.data?.user.phone && !response.data?.user.phoneVerified) {
+          router.push(`/verify-otp?method=phone&contact=${response.data.user.phone}`);
+        } else {
+          // Reload the full page to refresh authentication state
+          window.location.href = "/";
+        }
+      }
+    } catch (err: any) {
+      setError(err.message || "Login failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,23 +71,79 @@ export default function LoginPage() {
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="email-address" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="email-address"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 text-gray-900 dark:text-white rounded-t-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm dark:bg-gray-800"
-                placeholder="Email address"
-                value={formData.email}
-                onChange={handleInputChange}
-              />
+          {error && (
+            <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
+              <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
             </div>
+          )}
+
+          {/* Contact Method Toggle */}
+          <div className="flex gap-2 mb-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setContactMethod("email")}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-2",
+                contactMethod === "email"
+                  ? "bg-green-50 dark:bg-green-900/20 border-green-500"
+                  : ""
+              )}
+            >
+              <Mail className="h-4 w-4" />
+              <span>Email</span>
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setContactMethod("phone")}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-2",
+                contactMethod === "phone"
+                  ? "bg-green-50 dark:bg-green-900/20 border-green-500"
+                  : ""
+              )}
+            >
+              <Phone className="h-4 w-4" />
+              <span>Phone</span>
+            </Button>
+          </div>
+
+          <div className="rounded-md shadow-sm -space-y-px">
+            {/* Email or Phone Input */}
+            {contactMethod === "email" ? (
+              <div>
+                <label htmlFor="email-address" className="sr-only">
+                  Email address
+                </label>
+                <input
+                  id="email-address"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 text-gray-900 dark:text-white rounded-t-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm dark:bg-gray-800"
+                  placeholder="Email address"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                />
+              </div>
+            ) : (
+              <div className="rounded-t-md">
+                <label htmlFor="phone" className="sr-only">
+                  Phone number
+                </label>
+                <PhoneInput
+                  value={formData.phone}
+                  onChange={(value) =>
+                    setFormData({ ...formData, phone: value || "" })
+                  }
+                  defaultCountry="BD"
+                  placeholder="Enter phone number"
+                  className="rounded-t-md"
+                />
+              </div>
+            )}
             <div className="relative">
               <label htmlFor="password" className="sr-only">
                 Password
@@ -114,11 +199,12 @@ export default function LoginPage() {
           <div>
             <Button
               type="submit"
+              disabled={isLoading}
               className={cn(
-                "group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                "group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
               )}
             >
-              Sign in
+              {isLoading ? "Signing in..." : "Sign in"}
             </Button>
           </div>
 
