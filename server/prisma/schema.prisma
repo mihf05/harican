@@ -1,0 +1,117 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  SEEKER
+  POSTER
+  ADMIN
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String?  @unique
+  phone       String?  @unique
+  password    String?
+  emailVerified Boolean @default(false)
+  phoneVerified Boolean @default(false)
+  fullName    String
+  role        UserRole @default(SEEKER)
+  educationLevel String?
+  department  String?
+  experienceLevel String? // Fresher, Junior, Mid
+  preferredCareerTrack String?
+  cvText      String?
+  bio         String?
+  profileImage String?
+  isActive    Boolean  @default(true)
+  lastLoginAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  skills      UserSkill[]
+  verifications Verification[]
+  postedJobs  Job[]
+
+  @@map("users")
+}
+
+
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  userId     String?
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([identifier, value])
+  @@map("verifications")
+}
+
+model UserSkill {
+  id       String @id @default(cuid())
+  userId   String
+  skillName String
+  level    String? // Beginner, Intermediate, Advanced
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, skillName])
+  @@map("user_skills")
+}
+
+model Job {
+  id          String   @id @default(cuid())
+  title       String
+  company     String
+  location    String
+  isRemote    Boolean  @default(false)
+  jobType     String   // Internship, Part-time, Full-time, Freelance
+  experienceLevel String // Fresher, Junior, Mid
+  description String?
+  requirements String[]
+  skills      String[]
+  salary      String?
+  applicationUrl String?
+  postedById  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isActive    Boolean  @default(true)
+
+  postedBy User? @relation(fields: [postedById], references: [id], onDelete: SetNull)
+
+  @@map("jobs")
+}
+
+model LearningResource {
+  id          String   @id @default(cuid())
+  title       String
+  platform    String   // YouTube, Coursera, Udemy, etc.
+  url         String
+  description String?
+  skills      String[] // Related skills
+  costType    String   // Free, Paid
+  duration    String?  // e.g., "2 hours", "5 weeks"
+  level       String?  // Beginner, Intermediate, Advanced
+  rating      Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isActive    Boolean  @default(true)
+
+  @@map("learning_resources")
+}
