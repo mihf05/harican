@@ -5,10 +5,10 @@ import { cn } from "@/lib/utils";
 import { BookOpen, ArrowLeft, Mail, Phone, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { authAPI } from "@/lib/api";
 
-export default function VerifyOTPPage() {
+function VerifyOTPContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const method = searchParams.get("method") || "email";
@@ -191,5 +191,37 @@ export default function VerifyOTPPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function VerifyOTPPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-md w-full space-y-8">
+            <div className="text-center">
+              <div className="flex justify-center mb-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-blue-600 rounded-lg flex items-center justify-center">
+                  <BookOpen className="h-10 w-10 text-white" />
+                </div>
+              </div>
+            </div>
+            <div className="text-center space-y-6">
+              <div className="flex justify-center">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-green-600"></div>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Loading...
+                </h2>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <VerifyOTPContent />
+    </Suspense>
   );
 }

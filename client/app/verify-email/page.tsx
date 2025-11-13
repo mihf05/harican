@@ -3,10 +3,10 @@ import { Button } from "@/component/ui/button";
 import { cn } from "@/lib/utils";
 import { BookOpen, Mail, CheckCircle, AlertCircle, RefreshCw } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const [verificationStatus, setVerificationStatus] = useState<"pending" | "success" | "error">("pending");
   const [resendCount, setResendCount] = useState(0);
   const [countdown, setCountdown] = useState(0);
@@ -192,5 +192,37 @@ export default function VerifyEmailPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-md w-full space-y-8">
+            <div className="text-center">
+              <div className="flex justify-center mb-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-blue-600 rounded-lg flex items-center justify-center">
+                  <BookOpen className="h-10 w-10 text-white" />
+                </div>
+              </div>
+            </div>
+            <div className="text-center space-y-6">
+              <div className="flex justify-center">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-green-600"></div>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Loading...
+                </h2>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <VerifyEmailContent />
+    </Suspense>
   );
 }
