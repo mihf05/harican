@@ -13,20 +13,39 @@ dotenv.config()
 
 const app = express()
 const PORT = process.env.PORT || 3001
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://harican.vercel.app',
+  process.env.CLIENT_URL
+].filter(Boolean)
 
 // Middleware
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }))
 
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true)
+    if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+      callback(null, true)
+    } else {
+      callback(null, false)
+    }
+  },
   credentials: true,
-}))
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  exposedHeaders: ['Set-Cookie'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+}
+
+app.use(cors(corsOptions))
 
 app.use(cookieParser())
 app.use(express.json({ limit: '10mb' }))
-app.use(express.urlencoded({ extended: true, limit: '10mb' }))
+app.options('*', cors(corsOptions))
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -69,15 +88,5 @@ app.use('*', (req, res) => {
   })
 })
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`)
-  console.log(`📊 Health check: http://localhost:${PORT}/health`)
-  console.log(`🔐 Auth endpoints: http://localhost:${PORT}/api/auth`)
-  console.log(`👤 Profile endpoints: http://localhost:${PORT}/api/profile`)
-  console.log(`💼 Job endpoints: http://localhost:${PORT}/api/jobs`)
-  console.log(`📚 Resource endpoints: http://localhost:${PORT}/api/resources`)
-  console.log(`🌍 Environment: ${process.env.NODE_ENV}`)
-})
 
 export default app
