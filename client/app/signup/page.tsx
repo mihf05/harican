@@ -408,14 +408,7 @@ export default function SignupPage() {
               className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded mt-1"
             />
             <Label htmlFor="agreeToTerms" className="ml-2 text-sm">
-              I agree to the{" "}
-              <Link href="/terms" className="text-green-600 hover:text-green-500 underline font-medium">
-                Terms of Service
-              </Link>{" "}
-              and{" "}
-              <Link href="/privacy" className="text-green-600 hover:text-green-500 underline font-medium">
-                Privacy Policy
-              </Link>
+              I trust you
             </Label>
           </div>
           {errors.agreeToTerms && (
