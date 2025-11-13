@@ -4,16 +4,23 @@ import { prisma } from '../lib/prisma.js'
 // Middleware to authenticate user
 export const authenticateUser = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization
+    // Try to get token from cookie first, then from Authorization header
+    let token = req.cookies?.auth_token
     
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!token) {
+      const authHeader = req.headers.authorization
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7) // Remove 'Bearer ' prefix
+      }
+    }
+    
+    if (!token) {
       return res.status(401).json({ 
         success: false, 
         message: 'Authentication required' 
       })
     }
 
-    const token = authHeader.substring(7) // Remove 'Bearer ' prefix
     const decoded = authService.verifyToken(token)
 
     if (!decoded) {

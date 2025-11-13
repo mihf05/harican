@@ -2,23 +2,32 @@
 import { useMediaQuery } from "@/hooks/use-media-query";
 import ThemeSwitch from "@/lib/theme";
 import { cn } from "@/lib/utils";
-import { AlignJustify, X, Briefcase, BookOpen, User, Twitter, TrendingUp } from "lucide-react";
+import { AlignJustify, X, Briefcase, BookOpen, User, Twitter, TrendingUp, LogOut } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { Drawer } from "vaul";
+import { useAuth } from "@/lib/auth-context";
+import { Button } from "./ui/button";
 
 interface HomeHeaderProps {}
 
 export default function HomeHeader({}: HomeHeaderProps) {
   const isMobile = useMediaQuery("(max-width: 992px)");
   const pathname = usePathname();
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const { user, isAuthenticated, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
 
   const navItems = [
     { href: "/jobs", label: "Find Jobs", icon: Briefcase },
     { href: "/resources", label: "Learning Resources", icon: BookOpen },
-    { href: "/profile", label: "Profile", icon: User },
+    // { href: "/profile", label: "Profile", icon: User },
   ];
   return (
     <header className="w-full top-0 z-10 absolute lg:z-10 lg:flex lg:items-center lg:px-8 lg:py-0 text-primary-foreground">
@@ -114,18 +123,34 @@ export default function HomeHeader({}: HomeHeaderProps) {
           <ThemeSwitch
             className="border w-10 rounded-md h-10 dark:border-neutral-800 border-neutral-200"
           />
-          <Link
-            href="/login"
-            className="bg-[#334cec] text-white border dark:border-neutral-800 border-neutral-200 h-10 items-center flex justify-center px-3 rounded-md"
-          >
-            Login
-          </Link>
-          <Link
-            href="/signup"
-            className="bg-[#334cec] hover:bg-[#2c3e50] text-white border dark:border-neutral-800 border-neutral-200 h-10 items-center flex justify-center px-3 rounded-md"
-          >
-            Sign Up
-          </Link>
+          {isAuthenticated ? (
+            <>
+                <Link
+                href="/profile"
+                className="flex items-center gap-2 px-3 h-10 border dark:border-neutral-800 border-neutral-200 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors"
+                >
+                <User className="h-4 w-4" />
+                <span className="text-sm hidden md:inline">{user?.fullName || "User"}</span>
+                </Link>
+              <Button
+                onClick={handleLogout}
+                variant="outline"
+                className="h-10 gap-2"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="hidden md:inline">Logout</span>
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="bg-[#334cec] text-white border dark:border-neutral-800 border-neutral-200 h-10 items-center flex justify-center px-3 rounded-md"
+              >
+                Get Start
+              </Link>
+            </>
+          )}
         </nav>
       </div>
     </header>

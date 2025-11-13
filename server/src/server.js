@@ -1,13 +1,11 @@
+import dotenv from 'dotenv'
 import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
-import dotenv from 'dotenv'
-
-// Import routes
+import cookieParser from 'cookie-parser'
 import authRoutes from './routes/auth.js'
 import profileRoutes from './routes/profile.js'
 
-// Load environment variables
 dotenv.config()
 
 const app = express()
@@ -23,6 +21,7 @@ app.use(cors({
   credentials: true,
 }))
 
+app.use(cookieParser())
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 

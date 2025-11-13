@@ -7,6 +7,7 @@ const router = express.Router()
 // Authentication routes
 router.post('/register', authController.register)
 router.post('/login', authController.login)
+router.post('/logout', authController.logout)
 router.post('/verify-phone', authController.verifyPhone)
 router.post('/resend-phone-otp', authController.resendPhoneOTP)
 
