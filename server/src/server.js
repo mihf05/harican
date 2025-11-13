@@ -1,13 +1,14 @@
+import dotenv from 'dotenv'
 import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
-import dotenv from 'dotenv'
-
-// Import routes
+import cookieParser from 'cookie-parser'
 import authRoutes from './routes/auth.js'
 import profileRoutes from './routes/profile.js'
+import jobRoutes from './routes/jobs.js'
+import resourceRoutes from './routes/resources.js'
+import dashboardRoutes from './routes/dashboard.js'
 
-// Load environment variables
 dotenv.config()
 
 const app = express()
@@ -23,6 +24,7 @@ app.use(cors({
   credentials: true,
 }))
 
+app.use(cookieParser())
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
@@ -38,6 +40,9 @@ app.get('/health', (req, res) => {
 // API Routes
 app.use('/api/auth', authRoutes)
 app.use('/api/profile', profileRoutes)
+app.use('/api/jobs', jobRoutes)
+app.use('/api/resources', resourceRoutes)
+app.use('/api/dashboard', dashboardRoutes)
 
 // Global error handler
 app.use((error, req, res, next) => {
@@ -70,6 +75,8 @@ app.listen(PORT, () => {
   console.log(`📊 Health check: http://localhost:${PORT}/health`)
   console.log(`🔐 Auth endpoints: http://localhost:${PORT}/api/auth`)
   console.log(`👤 Profile endpoints: http://localhost:${PORT}/api/profile`)
+  console.log(`💼 Job endpoints: http://localhost:${PORT}/api/jobs`)
+  console.log(`📚 Resource endpoints: http://localhost:${PORT}/api/resources`)
   console.log(`🌍 Environment: ${process.env.NODE_ENV}`)
 })
 

@@ -9,6 +9,7 @@ const registerSchema = z.object({
   phone: z.string().min(10, 'Invalid phone number').optional(),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   fullName: z.string().min(1, 'Full name is required'),
+  role: z.enum(['SEEKER', 'POSTER']).optional().default('SEEKER'),
   educationLevel: z.string().optional(),
   department: z.string().optional(),
   experienceLevel: z.enum(['Fresher', 'Junior', 'Mid', 'Senior']).optional(),
@@ -19,8 +20,8 @@ const registerSchema = z.object({
 })
 
 const loginSchema = z.object({
-  email: z.string().email('Invalid email').optional(),
-  phone: z.string().optional(),
+  email: z.string().email('Invalid email').optional().or(z.literal('')),
+  phone: z.string().optional().or(z.literal('')),
   password: z.string().min(1, 'Password is required'),
 }).refine(data => data.email || data.phone, {
   message: 'Either email or phone number is required',
@@ -48,6 +49,9 @@ export const authController = {
 
       const { email, phone, password, ...userData } = validation.data
 
+      // Normalize phone number if provided (remove spaces, dashes, + signs)
+      const normalizedPhone = phone ? phone.replace(/[\s\-\+]/g, '') : undefined
+
       // Check if user already exists
       if (email) {
         const existingUser = await prisma.user.findUnique({
@@ -61,9 +65,9 @@ export const authController = {
         }
       }
 
-      if (phone) {
+      if (normalizedPhone) {
         const existingUser = await prisma.user.findUnique({
-          where: { phone }
+          where: { phone: normalizedPhone }
         })
         if (existingUser) {
           return res.status(400).json({
@@ -80,27 +84,27 @@ export const authController = {
       const user = await prisma.user.create({
         data: {
           email,
-          phone,
+          phone: normalizedPhone,
           password: hashedPassword,
           ...userData,
         }
       })
 
       // Send phone OTP if phone provided
-      if (phone) {
+      if (normalizedPhone) {
         try {
           const otp = authService.generateOTP()
           
           await prisma.verification.create({
             data: {
-              identifier: phone,
+              identifier: normalizedPhone,
               value: otp,
               expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
               userId: user.id,
             }
           })
 
-          await bulkSMSBDService.sendOTP(phone, otp)
+          await bulkSMSBDService.sendOTP(normalizedPhone, otp)
         } catch (smsError) {
           console.error('SMS sending error:', smsError)
         }
@@ -112,12 +116,19 @@ export const authController = {
       // Return user data (without password)
       const { password: _, ...userResponse } = user
 
+      // Set token in HTTP-only cookie
+      res.cookie('auth_token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      })
+
       res.status(201).json({
         success: true,
         message: 'Account created successfully',
         data: {
           user: userResponse,
-          token,
         }
       })
 
@@ -145,8 +156,11 @@ export const authController = {
 
       const { email, phone, password } = validation.data
 
+      // Normalize phone number if provided
+      const normalizedPhone = phone ? phone.replace(/[\s\-\+]/g, '') : undefined
+
       // Find user
-      const whereClause = email ? { email } : { phone }
+      const whereClause = email ? { email } : { phone: normalizedPhone }
       const user = await prisma.user.findUnique({
         where: whereClause,
         include: {
@@ -190,12 +204,19 @@ export const authController = {
       // Return user data (without password)
       const { password: _, ...userResponse } = user
 
+      // Set token in HTTP-only cookie
+      res.cookie('auth_token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      })
+
       res.json({
         success: true,
         message: 'Login successful',
         data: {
           user: userResponse,
-          token,
         }
       })
 
@@ -223,21 +244,46 @@ export const authController = {
 
       const { phone, otp } = validation.data
 
-      // Find verification record
+      // Normalize phone number (remove spaces, dashes, + signs)
+      const normalizedPhone = phone.replace(/[\s\-\+]/g, '')
+
+      // Find verification record - try both original and normalized phone
       const verification = await prisma.verification.findFirst({
         where: {
-          identifier: phone,
+          OR: [
+            { identifier: phone },
+            { identifier: normalizedPhone }
+          ],
           value: otp,
           expiresAt: {
             gt: new Date()
           }
         }
       })
-
+      
       if (!verification) {
+        // Check if OTP exists but is expired
+        const expiredOTP = await prisma.verification.findFirst({
+          where: {
+            OR: [
+              { identifier: phone },
+              { identifier: normalizedPhone }
+            ],
+            value: otp
+          }
+        })
+        
+        if (expiredOTP) {
+          return res.status(400).json({
+            success: false,
+            message: 'OTP has expired. Please request a new one.'
+          })
+        }
+        
+        console.log('Invalid OTP - no match found')
         return res.status(400).json({
           success: false,
-          message: 'Invalid or expired OTP'
+          message: 'Invalid OTP'
         })
       }
 
@@ -371,6 +417,29 @@ export const authController = {
       res.status(500).json({
         success: false,
         message: 'Failed to get user data'
+      })
+    }
+  },
+
+  // Logout user
+  async logout(req, res) {
+    try {
+      // Clear the auth cookie
+      res.clearCookie('auth_token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+      })
+
+      res.json({
+        success: true,
+        message: 'Logged out successfully'
+      })
+    } catch (error) {
+      console.error('Logout error:', error)
+      res.status(500).json({
+        success: false,
+        message: 'Logout failed'
       })
     }
   }

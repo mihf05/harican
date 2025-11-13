@@ -2,18 +2,25 @@ import { authService } from '../auth.js'
 import { prisma } from '../lib/prisma.js'
 
 // Middleware to authenticate user
-export const authenticateUser = async (req, res, next) => {
+export const authenticate = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization
+    // Try to get token from cookie first, then from Authorization header
+    let token = req.cookies?.auth_token
     
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!token) {
+      const authHeader = req.headers.authorization
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7) // Remove 'Bearer ' prefix
+      }
+    }
+    
+    if (!token) {
       return res.status(401).json({ 
         success: false, 
         message: 'Authentication required' 
       })
     }
 
-    const token = authHeader.substring(7) // Remove 'Bearer ' prefix
     const decoded = authService.verifyToken(token)
 
     if (!decoded) {
@@ -49,8 +56,11 @@ export const authenticateUser = async (req, res, next) => {
   }
 }
 
+// Alias for backward compatibility
+export const authenticateUser = authenticate;
+
 // Middleware to check user roles
-export const requireRole = (roles) => {
+export const authorize = (roles) => {
   return (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({ 
@@ -59,12 +69,12 @@ export const requireRole = (roles) => {
       })
     }
 
-    const userRoles = Array.isArray(roles) ? roles : [roles]
+    const allowedRoles = Array.isArray(roles) ? roles : [roles]
     
-    if (!userRoles.includes(req.user.role)) {
+    if (!allowedRoles.includes(req.user.role)) {
       return res.status(403).json({ 
         success: false, 
-        message: 'Insufficient permissions' 
+        message: 'Insufficient permissions. Required role: ' + allowedRoles.join(' or ')
       })
     }
 
@@ -72,11 +82,14 @@ export const requireRole = (roles) => {
   }
 }
 
-// Middleware for admin only routes
-export const requireAdmin = requireRole(['ADMIN'])
+// Alias for backward compatibility
+export const requireRole = authorize;
 
-// Middleware for employer and admin routes
-export const requireEmployerOrAdmin = requireRole(['EMPLOYER', 'ADMIN'])
+// Middleware for admin only routes
+export const requireAdmin = authorize(['ADMIN'])
+
+// Middleware for poster and admin routes
+export const requirePosterOrAdmin = authorize(['POSTER', 'ADMIN'])
 
 // Optional authentication - doesn't fail if no user
 export const optionalAuth = async (req, res, next) => {
