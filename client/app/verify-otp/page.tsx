@@ -6,6 +6,7 @@ import { BookOpen, ArrowLeft, Mail, Phone, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
+import { authAPI } from "@/lib/api";
 
 export default function VerifyOTPPage() {
   const router = useRouter();
@@ -14,6 +15,7 @@ export default function VerifyOTPPage() {
   const contact = searchParams.get("contact") || "";
   const [otp, setOtp] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
+  const [error, setError] = useState("");
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes
   const [canResend, setCanResend] = useState(false);
 
@@ -35,15 +37,22 @@ export default function VerifyOTPPage() {
   const handleOTPComplete = async (otpValue: string) => {
     setOtp(otpValue);
     setIsVerifying(true);
+    setError("");
     
     try {
-      // Simulate OTP verification
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Redirect to dashboard or complete signup
-      router.push("/dashboard");
-    } catch (error) {
-      console.error("OTP verification failed:", error);
+      if (method === "phone") {
+        const response = await authAPI.verifyPhone({
+          phone: contact,
+          otp: otpValue,
+        });
+
+        if (response.success) {
+          // Reload the full page to refresh authentication state
+          window.location.href = "/";
+        }
+      }
+    } catch (err: any) {
+      setError(err.message || "OTP verification failed. Please try again.");
       setIsVerifying(false);
     }
   };
@@ -51,14 +60,19 @@ export default function VerifyOTPPage() {
   const handleResendOTP = async () => {
     if (!canResend) return;
     
+    setError("");
+    
     try {
-      // Simulate resending OTP
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setTimeLeft(300);
-      setCanResend(false);
-    } catch (error) {
-      console.error("Failed to resend OTP:", error);
+      if (method === "phone") {
+        const response = await authAPI.resendPhoneOTP(contact);
+
+        if (response.success) {
+          setTimeLeft(300);
+          setCanResend(false);
+        }
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to resend OTP. Please try again.");
     }
   };
 
@@ -92,6 +106,12 @@ export default function VerifyOTPPage() {
         </div>
 
         <div className="mt-8 space-y-6">
+          {error && (
+            <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
+              <p className="text-sm text-red-800 dark:text-red-200 text-center">{error}</p>
+            </div>
+          )}
+          
           <div className="flex flex-col items-center space-y-4">
             <OTPInput
               length={6}
