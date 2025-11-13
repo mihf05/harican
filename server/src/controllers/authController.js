@@ -117,10 +117,12 @@ export const authController = {
       const { password: _, ...userResponse } = user
 
       // Set token in HTTP-only cookie
+      // For cross-origin requests (localhost to production), we need sameSite: 'none' with secure: true
+      const isProduction = process.env.NODE_ENV === 'production'
       res.cookie('auth_token', token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        secure: true, // Always true for cross-origin cookies
+        sameSite: isProduction ? 'none' : 'lax', // 'none' required for cross-origin
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       })
 
@@ -205,10 +207,12 @@ export const authController = {
       const { password: _, ...userResponse } = user
 
       // Set token in HTTP-only cookie
+      // For cross-origin requests (localhost to production), we need sameSite: 'none' with secure: true
+      const isProduction = process.env.NODE_ENV === 'production'
       res.cookie('auth_token', token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        secure: true, // Always true for cross-origin cookies
+        sameSite: isProduction ? 'none' : 'lax', // 'none' required for cross-origin
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       })
 

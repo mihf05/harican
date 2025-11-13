@@ -26,12 +26,22 @@ app.use(helmet({
 
 const corsOptions = {
   origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, Postman)
     if (!origin) return callback(null, true)
-    if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
-      callback(null, true)
-    } else {
-      callback(null, false)
+    
+    // Check if origin is in allowed list
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true)
     }
+    
+    // Allow any .vercel.app subdomain
+    if (origin.endsWith('.vercel.app')) {
+      return callback(null, true)
+    }
+    
+    // Log rejected origins for debugging
+    console.log('CORS rejected origin:', origin)
+    callback(new Error('Not allowed by CORS'))
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
