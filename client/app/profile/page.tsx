@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { User, Mail, Phone, GraduationCap, Briefcase, Award, Edit3, Save, X, Plus, Trash2, FileText, Upload, Camera, Zap, Target, CheckCircle2 } from "lucide-react";
 import type { Skill } from "@/lib/api";
 import Image from "next/image";
+import CVSkillExtractor from "@/component/CVSkillExtractor";
 
 export default function ProfilePage() {
   const { user, refreshUser } = useAuth();
@@ -123,6 +124,21 @@ export default function ProfilePage() {
       await loadSkills();
     } catch (error) {
       console.error("Failed to remove skill:", error);
+    }
+  };
+
+  const handleExtractedSkills = async (extractedSkills: string[]) => {
+    try {
+      // Add all extracted skills with default level "Intermediate"
+      const skillsToAdd = extractedSkills.map(skillName => ({
+        skillName,
+        level: "Intermediate" as const
+      }));
+      
+      await addSkills({ skills: skillsToAdd });
+      await loadSkills();
+    } catch (error) {
+      console.error("Failed to add extracted skills:", error);
     }
   };
 
@@ -519,10 +535,16 @@ export default function ProfilePage() {
 
             {/* Add Skill */}
             <div className="mb-8 p-6 bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-blue-900/20 rounded-xl border-2 border-gray-200 dark:border-gray-700 shadow-sm">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                Add New Skill
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                  <Plus className="h-4 w-4" />
+                  Add Skills
+                </h3>
+                <CVSkillExtractor 
+                  onSkillsExtracted={handleExtractedSkills}
+                  currentCVText={profileData.cvText}
+                />
+              </div>
               <div className="flex gap-3 flex-wrap">
                 <Input
                   placeholder="Skill name (e.g., Python, JavaScript)"
@@ -541,7 +563,7 @@ export default function ProfilePage() {
                 </select>
                 <Button onClick={handleAddSkill} disabled={!newSkill.skillName || isLoading} className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-lg shadow-lg flex items-center gap-2">
                   <Plus className="h-4 w-4" />
-                  Add Skill
+                  Add Manually
                 </Button>
               </div>
             </div>

@@ -11,6 +11,7 @@ import {
   LineChart, Line, BarChart, Bar, AreaChart, Area, XAxis, YAxis, 
   CartesianGrid, Tooltip, ResponsiveContainer 
 } from 'recharts';
+import DashboardAISuggestions from "../DashboardAISuggestions";
 
 interface SeekerDashboardProps {
   data: any;
@@ -239,6 +240,11 @@ export function SeekerDashboard({ data }: SeekerDashboardProps) {
               </div>
             </div>
           )}
+        </div>
+
+        {/* AI-Powered Suggestions Section - Replaces Recent Activity */}
+        <div className="mb-8">
+          <DashboardAISuggestions />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

@@ -10,7 +10,7 @@ const updateProfileSchema = z.object({
   preferredCareerTrack: z.string().optional(),
   cvText: z.string().optional(),
   bio: z.string().max(500, 'Bio must be less than 500 characters').optional(),
-  profileImage: z.string().url().optional(),
+  profileImage: z.string().url().optional().or(z.literal('')).nullable(),
 })
 
 const skillSchema = z.object({
