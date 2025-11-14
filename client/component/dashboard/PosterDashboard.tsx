@@ -180,7 +180,7 @@ export function PosterDashboard({ data }: PosterDashboardProps) {
               </div>
               Your Job Postings
             </h2>
-            <Button size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-full shadow-lg">
+            <Button size="sm" className="text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-full shadow-lg">
               <Plus className="h-4 w-4 mr-2" />
               Post New Job
             </Button>
@@ -229,7 +229,7 @@ export function PosterDashboard({ data }: PosterDashboardProps) {
               <p className="text-gray-600 dark:text-gray-400 mb-6">
                 Start by posting your first job and find talented candidates
               </p>
-              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-full shadow-lg">
+              <Button className="text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-full shadow-lg">
                 <Plus className="h-4 w-4 mr-2" />
                 Post Your First Job
               </Button>
