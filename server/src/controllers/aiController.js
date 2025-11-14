@@ -177,13 +177,8 @@ You can mention these specific opportunities to the user if relevant to their qu
       }
     }
 
-    // Call Gemini API
-    console.log('🔄 Calling Gemini API with model: gemini-2.0-flash');
-    console.log('📝 Message count:', messages.length);
     
     const aiResponse = await callGeminiAPI(messages);
-
-    console.log('✅ Gemini response received');
 
     res.json({
       success: true,
