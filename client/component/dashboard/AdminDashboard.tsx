@@ -11,30 +11,42 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, 
   Legend, ResponsiveContainer 
 } from 'recharts';
+import { useEffect, useState } from "react";
+import { dashboardAPI } from "@/lib/api";
 
 interface AdminDashboardProps {
   data: any;
 }
 
 export function AdminDashboard({ data }: AdminDashboardProps) {
-  // Mock data for admin charts
-  const userGrowthData = [
-    { month: 'Jan', seekers: 45, posters: 12 },
-    { month: 'Feb', seekers: 58, posters: 18 },
-    { month: 'Mar', seekers: 72, posters: 22 },
-    { month: 'Apr', seekers: 89, posters: 28 },
-    { month: 'May', seekers: 105, posters: 35 },
-    { month: 'Jun', seekers: 128, posters: 42 },
-  ];
+  const [userGrowthData, setUserGrowthData] = useState<Array<{ month: string; seekers: number; posters: number }>>([]);
+  const [jobStatsData, setJobStatsData] = useState<Array<{ month: string; posted: number; filled: number }>>([]);
+  const [loading, setLoading] = useState(true);
 
-  const jobStatsData = [
-    { month: 'Jan', posted: 25, filled: 18 },
-    { month: 'Feb', posted: 35, filled: 28 },
-    { month: 'Mar', posted: 42, filled: 35 },
-    { month: 'Apr', posted: 58, filled: 45 },
-    { month: 'May', posted: 65, filled: 52 },
-    { month: 'Jun', posted: 78, filled: 63 },
-  ];
+  useEffect(() => {
+    const fetchTrendsData = async () => {
+      try {
+        const [userGrowthResponse, jobStatsResponse] = await Promise.all([
+          dashboardAPI.getUserGrowthTrends(),
+          dashboardAPI.getJobStatsTrends()
+        ]);
+
+        if (userGrowthResponse.success && userGrowthResponse.data) {
+          setUserGrowthData(userGrowthResponse.data);
+        }
+
+        if (jobStatsResponse.success && jobStatsResponse.data) {
+          setJobStatsData(jobStatsResponse.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch trends data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTrendsData();
+  }, []);
 
   const platformActivityData = [
     { name: 'Job Seekers', value: data.stats?.totalSeekers || 0 },
@@ -43,6 +55,25 @@ export function AdminDashboard({ data }: AdminDashboardProps) {
   ];
 
   const COLORS = ['#3b82f6', '#10b981', '#8b5cf6'];
+
+  // Calculate success rate
+  const calculateSuccessRate = () => {
+    if (!jobStatsData || jobStatsData.length === 0) return 0;
+    const latestMonth = jobStatsData[jobStatsData.length - 1];
+    if (!latestMonth.posted || latestMonth.posted === 0) return 0;
+    return ((latestMonth.filled / latestMonth.posted) * 100).toFixed(0);
+  };
+
+  // Calculate growth percentage
+  const calculateGrowthPercentage = () => {
+    if (!userGrowthData || userGrowthData.length < 2) return 0;
+    const current = userGrowthData[userGrowthData.length - 1];
+    const previous = userGrowthData[userGrowthData.length - 2];
+    const currentTotal = current.seekers + current.posters;
+    const previousTotal = previous.seekers + previous.posters;
+    if (previousTotal === 0) return 0;
+    return (((currentTotal - previousTotal) / previousTotal) * 100).toFixed(0);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50 to-pink-50 dark:from-gray-950 dark:via-purple-950 dark:to-pink-950">
@@ -73,7 +104,7 @@ export function AdminDashboard({ data }: AdminDashboardProps) {
                   {data.stats?.totalUsers || 0}
                 </p>
                 <p className="text-xs text-blue-600 dark:text-blue-400 mt-1 flex items-center gap-1">
-                  <TrendingUp className="h-3 w-3" /> +15% this month
+                  <TrendingUp className="h-3 w-3" /> {calculateGrowthPercentage() !== 0 ? `+${calculateGrowthPercentage()}% this month` : 'Growing steadily'}
                 </p>
               </div>
               <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-lg">
@@ -181,34 +212,44 @@ export function AdminDashboard({ data }: AdminDashboardProps) {
               <Activity className="h-5 w-5 text-blue-600" />
               User Growth Trends
             </h3>
-            <ResponsiveContainer width="100%" height={250}>
-              <AreaChart data={userGrowthData}>
-                <defs>
-                  <linearGradient id="colorSeekers" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                  </linearGradient>
-                  <linearGradient id="colorPosters" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
-                <XAxis dataKey="month" className="text-xs" />
-                <YAxis className="text-xs" />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.95)', 
-                    border: 'none',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-                  }}
-                />
-                <Legend />
-                <Area type="monotone" dataKey="seekers" stroke="#3b82f6" fillOpacity={1} fill="url(#colorSeekers)" />
-                <Area type="monotone" dataKey="posters" stroke="#10b981" fillOpacity={1} fill="url(#colorPosters)" />
-              </AreaChart>
-            </ResponsiveContainer>
+            {loading ? (
+              <div className="flex items-center justify-center h-[250px]">
+                <p className="text-gray-500">Loading chart data...</p>
+              </div>
+            ) : userGrowthData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <AreaChart data={userGrowthData}>
+                  <defs>
+                    <linearGradient id="colorSeekers" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                    </linearGradient>
+                    <linearGradient id="colorPosters" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
+                  <XAxis dataKey="month" className="text-xs" />
+                  <YAxis className="text-xs" />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                      border: 'none',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                    }}
+                  />
+                  <Legend />
+                  <Area type="monotone" dataKey="seekers" stroke="#3b82f6" fillOpacity={1} fill="url(#colorSeekers)" />
+                  <Area type="monotone" dataKey="posters" stroke="#10b981" fillOpacity={1} fill="url(#colorPosters)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-[250px]">
+                <p className="text-gray-500">No user growth data available</p>
+              </div>
+            )}
           </div>
 
           {/* Jobs Posted vs Filled */}
@@ -217,24 +258,34 @@ export function AdminDashboard({ data }: AdminDashboardProps) {
               <BarChart3 className="h-5 w-5 text-purple-600" />
               Jobs Posted vs People Hired
             </h3>
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={jobStatsData}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
-                <XAxis dataKey="month" className="text-xs" />
-                <YAxis className="text-xs" />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.95)', 
-                    border: 'none',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-                  }}
-                />
-                <Legend />
-                <Bar dataKey="posted" fill="#8b5cf6" radius={[8, 8, 0, 0]} name="Jobs Posted" />
-                <Bar dataKey="filled" fill="#10b981" radius={[8, 8, 0, 0]} name="People Hired" />
-              </BarChart>
-            </ResponsiveContainer>
+            {loading ? (
+              <div className="flex items-center justify-center h-[250px]">
+                <p className="text-gray-500">Loading chart data...</p>
+              </div>
+            ) : jobStatsData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={jobStatsData}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
+                  <XAxis dataKey="month" className="text-xs" />
+                  <YAxis className="text-xs" />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                      border: 'none',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                    }}
+                  />
+                  <Legend />
+                  <Bar dataKey="posted" fill="#8b5cf6" radius={[8, 8, 0, 0]} name="Jobs Posted" />
+                  <Bar dataKey="filled" fill="#10b981" radius={[8, 8, 0, 0]} name="People Hired" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-[250px]">
+                <p className="text-gray-500">No job statistics available</p>
+              </div>
+            )}
           </div>
 
           {/* Platform Activity Distribution */}
@@ -277,22 +328,32 @@ export function AdminDashboard({ data }: AdminDashboardProps) {
               <Target className="h-5 w-5" />
               Platform Success Rate
             </h3>
-            <div className="text-center py-8">
-              <div className="text-6xl font-bold mb-2">
-                {((jobStatsData[jobStatsData.length - 1].filled / jobStatsData[jobStatsData.length - 1].posted) * 100).toFixed(0)}%
+            {loading ? (
+              <div className="text-center py-8">
+                <p className="text-green-100">Loading success rate...</p>
               </div>
-              <p className="text-green-100 text-lg mb-4">Jobs Successfully Filled</p>
-              <div className="grid grid-cols-2 gap-4 mt-6">
-                <div className="bg-white bg-opacity-20 rounded-lg p-3">
-                  <div className="text-2xl font-bold">{jobStatsData[jobStatsData.length - 1].posted}</div>
-                  <div className="text-sm text-green-100">Total Posted</div>
+            ) : jobStatsData.length > 0 ? (
+              <div className="text-center py-8">
+                <div className="text-6xl font-bold mb-2">
+                  {calculateSuccessRate()}%
                 </div>
-                <div className="bg-white bg-opacity-20 rounded-lg p-3">
-                  <div className="text-2xl font-bold">{jobStatsData[jobStatsData.length - 1].filled}</div>
-                  <div className="text-sm text-green-100">People Hired</div>
+                <p className="text-green-100 text-lg mb-4">Jobs Successfully Filled</p>
+                <div className="grid grid-cols-2 gap-4 mt-6">
+                  <div className="bg-white bg-opacity-20 rounded-lg p-3">
+                    <div className="text-2xl font-bold">{jobStatsData[jobStatsData.length - 1]?.posted || 0}</div>
+                    <div className="text-sm text-green-100">Total Posted</div>
+                  </div>
+                  <div className="bg-white bg-opacity-20 rounded-lg p-3">
+                    <div className="text-2xl font-bold">{jobStatsData[jobStatsData.length - 1]?.filled || 0}</div>
+                    <div className="text-sm text-green-100">People Hired</div>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-green-100">No success rate data available</p>
+              </div>
+            )}
           </div>
         </div>
 

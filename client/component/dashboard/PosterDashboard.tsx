@@ -10,21 +10,43 @@ import {
   LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, 
   CartesianGrid, Tooltip, Legend, ResponsiveContainer 
 } from 'recharts';
+import { useEffect, useState } from "react";
+import { dashboardAPI } from "@/lib/api";
+import { CreateJobDialog } from "./CreateJobDialog";
 
 interface PosterDashboardProps {
   data: any;
+  onRefresh?: () => void;
 }
 
-export function PosterDashboard({ data }: PosterDashboardProps) {
-  // Mock data for charts
-  const jobPerformanceData = [
-    { month: 'Jan', posted: 5, active: 4 },
-    { month: 'Feb', posted: 8, active: 7 },
-    { month: 'Mar', posted: 6, active: 5 },
-    { month: 'Apr', posted: 10, active: 9 },
-    { month: 'May', posted: 7, active: 6 },
-    { month: 'Jun', posted: 12, active: 11 },
-  ];
+export function PosterDashboard({ data, onRefresh }: PosterDashboardProps) {
+  const [jobPerformanceData, setJobPerformanceData] = useState<Array<{ month: string; posted: number; active: number }>>([]);
+  const [loading, setLoading] = useState(true);
+
+  const handleJobCreated = () => {
+    // Refresh dashboard data after job is created
+    if (onRefresh) {
+      onRefresh();
+    }
+  };
+
+  useEffect(() => {
+    const fetchTrendsData = async () => {
+      try {
+        const response = await dashboardAPI.getPosterJobTrends();
+
+        if (response.success && response.data) {
+          setJobPerformanceData(response.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch poster trends data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTrendsData();
+  }, []);
 
   const jobStatusData = [
     { name: 'Active', value: data.stats?.activeJobs || 0 },
@@ -116,24 +138,34 @@ export function PosterDashboard({ data }: PosterDashboardProps) {
               <Activity className="h-5 w-5 text-blue-600" />
               Job Posting Trends
             </h3>
-            <ResponsiveContainer width="100%" height={250}>
-              <LineChart data={jobPerformanceData}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
-                <XAxis dataKey="month" className="text-xs" />
-                <YAxis className="text-xs" />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.95)', 
-                    border: 'none',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-                  }}
-                />
-                <Legend />
-                <Line type="monotone" dataKey="posted" stroke="#3b82f6" strokeWidth={3} dot={{ r: 5 }} />
-                <Line type="monotone" dataKey="active" stroke="#10b981" strokeWidth={3} dot={{ r: 5 }} />
-              </LineChart>
-            </ResponsiveContainer>
+            {loading ? (
+              <div className="flex items-center justify-center h-[250px]">
+                <p className="text-gray-500">Loading chart data...</p>
+              </div>
+            ) : jobPerformanceData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <LineChart data={jobPerformanceData}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
+                  <XAxis dataKey="month" className="text-xs" />
+                  <YAxis className="text-xs" />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                      border: 'none',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                    }}
+                  />
+                  <Legend />
+                  <Line type="monotone" dataKey="posted" stroke="#3b82f6" strokeWidth={3} dot={{ r: 5 }} />
+                  <Line type="monotone" dataKey="active" stroke="#10b981" strokeWidth={3} dot={{ r: 5 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-[250px]">
+                <p className="text-gray-500">No job posting data available</p>
+              </div>
+            )}
           </div>
 
           {/* Job Status Distribution */}
@@ -142,32 +174,38 @@ export function PosterDashboard({ data }: PosterDashboardProps) {
               <PieChartIcon className="h-5 w-5 text-green-600" />
               Job Status Distribution
             </h3>
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
-                <Pie
-                  data={jobStatusData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {jobStatusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.95)', 
-                    border: 'none',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+            {(data.stats?.activeJobs || 0) + (data.stats?.inactiveJobs || 0) > 0 ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={jobStatusData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {jobStatusData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                      border: 'none',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-[250px]">
+                <p className="text-gray-500">No job status data available</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -180,10 +218,7 @@ export function PosterDashboard({ data }: PosterDashboardProps) {
               </div>
               Your Job Postings
             </h2>
-            <Button size="sm" className="text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-full shadow-lg">
-              <Plus className="h-4 w-4 mr-2" />
-              Post New Job
-            </Button>
+            <CreateJobDialog onJobCreated={handleJobCreated} />
           </div>
 
           {data.postedJobs && data.postedJobs.length > 0 ? (
@@ -229,10 +264,7 @@ export function PosterDashboard({ data }: PosterDashboardProps) {
               <p className="text-gray-600 dark:text-gray-400 mb-6">
                 Start by posting your first job and find talented candidates
               </p>
-              <Button className="text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-full shadow-lg">
-                <Plus className="h-4 w-4 mr-2" />
-                Post Your First Job
-              </Button>
+              <CreateJobDialog onJobCreated={handleJobCreated} />
             </div>
           )}
         </div>
