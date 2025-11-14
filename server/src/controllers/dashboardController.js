@@ -229,5 +229,191 @@ export const dashboardController = {
         error: error.message
       });
     }
+  },
+
+  // Get user growth trends (Admin only)
+  async getUserGrowthTrends(req, res) {
+    try {
+      const userRole = req.user.role;
+      
+      if (userRole !== 'ADMIN') {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied. Admin only.'
+        });
+      }
+
+      // Get data for last 6 months
+      const monthsData = [];
+      const now = new Date();
+      
+      for (let i = 5; i >= 0; i--) {
+        const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const nextDate = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
+        
+        const seekers = await prisma.user.count({
+          where: {
+            role: 'SEEKER',
+            createdAt: {
+              gte: date,
+              lt: nextDate
+            }
+          }
+        });
+
+        const posters = await prisma.user.count({
+          where: {
+            role: 'POSTER',
+            createdAt: {
+              gte: date,
+              lt: nextDate
+            }
+          }
+        });
+
+        monthsData.push({
+          month: date.toLocaleDateString('en-US', { month: 'short' }),
+          seekers,
+          posters
+        });
+      }
+
+      res.json({
+        success: true,
+        data: monthsData
+      });
+    } catch (error) {
+      console.error('Get user growth trends error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch user growth trends',
+        error: error.message
+      });
+    }
+  },
+
+  // Get job statistics trends (Admin only)
+  async getJobStatsTrends(req, res) {
+    try {
+      const userRole = req.user.role;
+      
+      if (userRole !== 'ADMIN') {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied. Admin only.'
+        });
+      }
+
+      // Get data for last 6 months
+      const monthsData = [];
+      const now = new Date();
+      
+      for (let i = 5; i >= 0; i--) {
+        const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const nextDate = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
+        
+        const posted = await prisma.job.count({
+          where: {
+            createdAt: {
+              gte: date,
+              lt: nextDate
+            }
+          }
+        });
+
+        // For "filled" we'll use inactive jobs as a proxy (assuming jobs are deactivated when filled)
+        // This is an approximation - you may want to add a specific "filled" status field
+        const filled = await prisma.job.count({
+          where: {
+            createdAt: {
+              gte: date,
+              lt: nextDate
+            },
+            isActive: false
+          }
+        });
+
+        monthsData.push({
+          month: date.toLocaleDateString('en-US', { month: 'short' }),
+          posted,
+          filled
+        });
+      }
+
+      res.json({
+        success: true,
+        data: monthsData
+      });
+    } catch (error) {
+      console.error('Get job stats trends error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch job statistics trends',
+        error: error.message
+      });
+    }
+  },
+
+  // Get poster's job posting trends (Poster only)
+  async getPosterJobTrends(req, res) {
+    try {
+      const userId = req.user.id;
+      const userRole = req.user.role;
+      
+      if (userRole !== 'POSTER') {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied. Poster only.'
+        });
+      }
+
+      // Get data for last 6 months
+      const monthsData = [];
+      const now = new Date();
+      
+      for (let i = 5; i >= 0; i--) {
+        const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const nextDate = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
+        
+        const posted = await prisma.job.count({
+          where: {
+            postedById: userId,
+            createdAt: {
+              gte: date,
+              lt: nextDate
+            }
+          }
+        });
+
+        const active = await prisma.job.count({
+          where: {
+            postedById: userId,
+            isActive: true,
+            createdAt: {
+              gte: date,
+              lt: nextDate
+            }
+          }
+        });
+
+        monthsData.push({
+          month: date.toLocaleDateString('en-US', { month: 'short' }),
+          posted,
+          active
+        });
+      }
+
+      res.json({
+        success: true,
+        data: monthsData
+      });
+    } catch (error) {
+      console.error('Get poster job trends error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch poster job trends',
+        error: error.message
+      });
+    }
   }
 };

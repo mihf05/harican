@@ -408,7 +408,7 @@ export default function SignupPage() {
               className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded mt-1"
             />
             <Label htmlFor="agreeToTerms" className="ml-2 text-sm">
-              I trust you
+              I agree
             </Label>
           </div>
           {errors.agreeToTerms && (

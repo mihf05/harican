@@ -408,6 +408,21 @@ export const dashboardAPI = {
   async getDashboard(): Promise<ApiResponse<any>> {
     return apiRequest('/api/dashboard');
   },
+
+  // Get user growth trends (Admin only)
+  async getUserGrowthTrends(): Promise<ApiResponse<Array<{ month: string; seekers: number; posters: number }>>> {
+    return apiRequest('/api/dashboard/user-growth');
+  },
+
+  // Get job statistics trends (Admin only)
+  async getJobStatsTrends(): Promise<ApiResponse<Array<{ month: string; posted: number; filled: number }>>> {
+    return apiRequest('/api/dashboard/job-stats');
+  },
+
+  // Get poster's job trends (Poster only)
+  async getPosterJobTrends(): Promise<ApiResponse<Array<{ month: string; posted: number; active: number }>>> {
+    return apiRequest('/api/dashboard/poster-trends');
+  },
 };
 
 // Export everything

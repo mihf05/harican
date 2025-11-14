@@ -47,7 +47,7 @@ export default function DashboardPage() {
   if (user?.role === 'ADMIN') {
     return <AdminDashboard data={dashboardData} />;
   } else if (user?.role === 'POSTER') {
-    return <PosterDashboard data={dashboardData} />;
+    return <PosterDashboard data={dashboardData} onRefresh={fetchDashboard} />;
   } else {
     return <SeekerDashboard data={dashboardData} />;
   }

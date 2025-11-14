@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/component/ui/button";
 import { 
   Briefcase, BookOpen, TrendingUp, MapPin, Target, Award, 
@@ -17,22 +17,15 @@ interface SeekerDashboardProps {
 }
 
 export function SeekerDashboard({ data }: SeekerDashboardProps) {
-  // Mock chart data - in production this would come from the backend
-  const jobTrendData = [
-    { month: 'Jan', applied: 12, matched: 8 },
-    { month: 'Feb', applied: 19, matched: 13 },
-    { month: 'Mar', applied: 15, matched: 11 },
-    { month: 'Apr', applied: 25, matched: 18 },
-    { month: 'May', applied: 22, matched: 16 },
-    { month: 'Jun', applied: 30, matched: 22 },
-  ];
-
-  const skillsData = [
-    { name: 'JavaScript', value: 85 },
-    { name: 'React', value: 75 },
-    { name: 'Python', value: 65 },
-    { name: 'Design', value: 55 },
-  ];
+  // Transform user skills into chart data
+  const skillsData = useMemo(() => {
+    if (!data.user.skills || data.user.skills.length === 0) return [];
+    
+    return data.user.skills.map((skill: any) => ({
+      name: skill.skillName,
+      level: skill.level === 'Advanced' ? 90 : skill.level === 'Intermediate' ? 70 : 50
+    }));
+  }, [data.user.skills]);
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 dark:from-gray-950 dark:via-blue-950 dark:to-purple-950">
@@ -62,8 +55,8 @@ export function SeekerDashboard({ data }: SeekerDashboardProps) {
                 <p className="text-3xl font-bold text-gray-900 dark:text-white">
                   {data.stats?.totalJobs}
                 </p>
-                <p className="text-xs text-green-600 dark:text-green-400 mt-1 flex items-center gap-1">
-                  <TrendingUp className="h-3 w-3" /> +12% this month
+                <p className="text-xs text-blue-600 dark:text-blue-400 mt-1 flex items-center gap-1">
+                  <Briefcase className="h-3 w-3" /> Available positions
                 </p>
               </div>
               <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-lg">
@@ -129,63 +122,64 @@ export function SeekerDashboard({ data }: SeekerDashboardProps) {
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Job Application Trend Chart */}
+          {/* Job Match Overview */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-blue-600" />
-              Job Application Trends
+              Job Match Overview
             </h3>
-            <ResponsiveContainer width="100%" height={250}>
-              <AreaChart data={jobTrendData}>
-                <defs>
-                  <linearGradient id="colorApplied" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                  </linearGradient>
-                  <linearGradient id="colorMatched" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
-                <XAxis dataKey="month" className="text-xs" />
-                <YAxis className="text-xs" />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.95)', 
-                    border: 'none',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-                  }}
-                />
-                <Area type="monotone" dataKey="applied" stroke="#3b82f6" fillOpacity={1} fill="url(#colorApplied)" />
-                <Area type="monotone" dataKey="matched" stroke="#10b981" fillOpacity={1} fill="url(#colorMatched)" />
-              </AreaChart>
-            </ResponsiveContainer>
+            <div className="flex flex-col items-center justify-center h-[250px]">
+              <div className="text-center">
+                <div className="text-6xl font-bold text-blue-600 mb-2">
+                  {data.stats?.matchedJob || 0}
+                </div>
+                <p className="text-lg text-gray-600 dark:text-gray-400 mb-4">Jobs Matched to Your Profile</p>
+                <div className="grid grid-cols-2 gap-4 mt-6">
+                  <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-3">
+                    <div className="text-2xl font-bold text-blue-600">{data.stats?.totalJobs || 0}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Total Jobs</div>
+                  </div>
+                  <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-3">
+                    <div className="text-2xl font-bold text-green-600">{data.stats?.remoteJobs || 0}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Remote</div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Skills Chart */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <Award className="h-5 w-5 text-purple-600" />
-              Skill Proficiency
+              Your Skills
             </h3>
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={skillsData}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
-                <XAxis dataKey="name" className="text-xs" />
-                <YAxis className="text-xs" />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.95)', 
-                    border: 'none',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-                  }}
-                />
-                <Bar dataKey="value" fill="#8b5cf6" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            {skillsData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={skillsData}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
+                  <XAxis dataKey="name" className="text-xs" />
+                  <YAxis className="text-xs" domain={[0, 100]} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                      border: 'none',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                    }}
+                  />
+                  <Bar dataKey="level" fill="#8b5cf6" radius={[8, 8, 0, 0]} name="Proficiency" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-[250px]">
+                <Award className="h-16 w-16 text-gray-300 dark:text-gray-600 mb-4" />
+                <p className="text-gray-500 dark:text-gray-400 mb-4">No skills added yet</p>
+                <Button asChild size="sm" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-full">
+                  <Link href="/profile">Add Your Skills</Link>
+                </Button>
+              </div>
+            )}
           </div>
         </div>
 
