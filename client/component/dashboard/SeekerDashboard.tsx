@@ -11,6 +11,8 @@ import {
   LineChart, Line, BarChart, Bar, AreaChart, Area, XAxis, YAxis, 
   CartesianGrid, Tooltip, ResponsiveContainer 
 } from 'recharts';
+import DashboardAISuggestions from "../DashboardAISuggestions";
+import RoadmapGenerator from "../RoadmapGenerator";
 
 interface SeekerDashboardProps {
   data: any;
@@ -227,18 +229,50 @@ export function SeekerDashboard({ data }: SeekerDashboardProps) {
                 <Award className="h-4 w-4" />
                 Your Skills
               </span>
-              <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2">
                 {data.user.skills.map((skill: any) => (
                   <span
-                    key={skill.id}
-                    className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full text-sm font-medium shadow-md hover:shadow-lg transition-all hover:scale-105"
+                  key={skill.id}
+                  className="px-4 py-2 bg-white/10 dark:bg-white/5 backdrop-blur-md border border-white/20 dark:border-white/10 text-black dark:text-white rounded-lg text-sm font-medium shadow-lg hover:shadow-xl hover:bg-white/20 dark:hover:bg-white/10 transition-all hover:scale-105"
                   >
-                    {skill.skillName}
+                  {skill.skillName}
                   </span>
                 ))}
-              </div>
+                </div>
             </div>
           )}
+        </div>
+
+        {/* AI-Powered Suggestions Section - Replaces Recent Activity */}
+        <div className="mb-8">
+          <DashboardAISuggestions />
+        </div>
+
+        {/* Quick Actions Section */}
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-xl p-6 mb-8 text-white">
+          <h3 className="text-xl font-bold mb-4">🚀 Accelerate Your Career</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <p className="text-blue-100 mb-3">
+                Get a personalized, AI-powered roadmap to achieve your dream career in just a few clicks!
+              </p>
+              <ul className="text-sm text-blue-100 space-y-1 mb-4">
+                <li>• Step-by-step learning path</li>
+                <li>• Skill recommendations</li>
+                <li>• Project ideas & resources</li>
+                <li>• Career advice from AI</li>
+              </ul>
+            </div>
+            <div className="flex items-center justify-center">
+              <RoadmapGenerator 
+                trigger={
+                  <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50 shadow-lg hover:shadow-xl transition-all font-semibold">
+                    Generate My Roadmap
+                  </Button>
+                }
+              />
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

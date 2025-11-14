@@ -8,6 +8,9 @@ import profileRoutes from './routes/profile.js'
 import jobRoutes from './routes/jobs.js'
 import resourceRoutes from './routes/resources.js'
 import dashboardRoutes from './routes/dashboard.js'
+import aiRoutes from './routes/ai.js'
+import suggestionRoutes from './routes/suggestions.js'
+import roadmapRoutes from './routes/roadmap.js'
 
 dotenv.config()
 
@@ -65,6 +68,9 @@ app.use('/api/profile', profileRoutes)
 app.use('/api/jobs', jobRoutes)
 app.use('/api/resources', resourceRoutes)
 app.use('/api/dashboard', dashboardRoutes)
+app.use('/api/ai', aiRoutes)
+app.use('/api/suggestions', suggestionRoutes)
+app.use('/api/roadmap', roadmapRoutes)
 
 // Global error handler
 app.use((error, req, res, next) => {
@@ -95,7 +101,6 @@ app.use('*', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on http://localhost:${PORT}`)
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`)
-  console.log(`🔗 Allowed origins: ${allowedOrigins.join(', ')}`)
 })
 
 export default app

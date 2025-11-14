@@ -42,6 +42,7 @@ model User {
   skills      UserSkill[]
   verifications Verification[]
   postedJobs  Job[]
+  careerRoadmaps CareerRoadmap[]
 
   @@map("users")
 }
@@ -115,4 +116,21 @@ model LearningResource {
   isActive    Boolean  @default(true)
 
   @@map("learning_resources")
+}
+
+model CareerRoadmap {
+  id              String   @id @default(cuid())
+  userId          String
+  targetRole      String   // Frontend Developer, Data Analyst, etc.
+  timeframe       Int      // in months (3, 6, 12)
+  learningTime    String?  // hours per week
+  currentSkills   String[] // Skills user has now
+  roadmapData     Json     // Structured roadmap with phases, topics, projects
+  status          String   @default("active") // active, completed, archived
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("career_roadmaps")
 }
