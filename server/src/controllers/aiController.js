@@ -1,8 +1,13 @@
 import { OpenRouter } from '@openrouter/sdk';
 import { prisma } from '../lib/prisma.js';
 
+// Initialize OpenRouter client
+const apiKey = process.env.OPENROUTER_API_KEY || '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';
+
+console.log('🤖 Initializing OpenRouter with API key:', apiKey ? `${apiKey.substring(0, 15)}...` : 'NOT SET');
+
 const openRouter = new OpenRouter({
-  apiKey: process.env.OPENROUTER_API_KEY || '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',
+  apiKey: apiKey,
   defaultHeaders: {
     'HTTP-Referer': process.env.SITE_URL || 'https://harican.vercel.app',
     'X-Title': 'Harican - Career Assistant',
@@ -140,12 +145,16 @@ You can mention these specific opportunities to the user if relevant to their qu
     }
 
     // Call OpenRouter API with DeepSeek model
-    const completion = await openRouter.chat.send({
+    // Using deepseek-chat model (not the free variant to avoid policy issues)
+    console.log('🔄 Calling OpenRouter API with model: deepseek/deepseek-chat');
+    console.log('📝 Message count:', messages.length);
+    
+    const completion = await openRouter.chat.completions.create({
       model: 'deepseek/deepseek-chat',
       messages: messages,
-      stream: false,
     });
 
+    console.log('✅ OpenRouter response received');
     const aiResponse = completion.choices[0].message.content;
 
     res.json({
@@ -158,11 +167,43 @@ You can mention these specific opportunities to the user if relevant to their qu
     });
 
   } catch (error) {
-    console.error('AI Chat Error:', error);
-    res.status(500).json({
+    console.error('❌ AI Chat Error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      status: error.status,
+      statusText: error.statusText,
+      response: error.response?.data
+    });
+    
+    // More detailed error message
+    let errorMessage = 'Failed to get AI response';
+    let statusCode = 500;
+    
+    if (error.message?.includes('No endpoints found matching your data policy')) {
+      errorMessage = 'AI model is currently unavailable. This may be due to API configuration. Please check OpenRouter settings at https://openrouter.ai/settings/privacy';
+      statusCode = 503;
+      console.error('💡 Hint: You may need to configure your data policy on OpenRouter dashboard');
+    } else if (error.message?.includes('API key') || error.message?.includes('Unauthorized')) {
+      errorMessage = 'AI service authentication failed. Please check API key configuration.';
+      statusCode = 503;
+      console.error('💡 Hint: Check that OPENROUTER_API_KEY environment variable is set correctly');
+    } else if (error.message?.includes('rate limit')) {
+      errorMessage = 'AI service rate limit exceeded. Please try again in a moment.';
+      statusCode = 429;
+    } else if (error.response) {
+      errorMessage = `AI service error: ${error.response.data?.error?.message || error.message}`;
+    } else if (error.message) {
+      errorMessage = `AI service error: ${error.message}`;
+    }
+    
+    res.status(statusCode).json({
       success: false,
-      message: 'Failed to get AI response',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      message: errorMessage,
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      details: process.env.NODE_ENV === 'development' ? {
+        stack: error.stack,
+        response: error.response?.data
+      } : undefined
     });
   }
 };
@@ -216,7 +257,7 @@ INSTRUCTIONS:
 
 Return the JSON now:`;
 
-    const completion = await openRouter.chat.send({
+    const completion = await openRouter.chat.completions.create({
       model: 'deepseek/deepseek-chat',
       messages: [
         {
@@ -224,7 +265,6 @@ Return the JSON now:`;
           content: extractionPrompt
         }
       ],
-      stream: false,
     });
 
     const aiResponse = completion.choices[0].message.content;

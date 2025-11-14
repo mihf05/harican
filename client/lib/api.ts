@@ -439,6 +439,43 @@ export const aiAPI = {
   },
 };
 
+// Roadmap API
+export const roadmapAPI = {
+  // Generate a new career roadmap
+  async generateRoadmap(data: {
+    targetRole: string;
+    timeframe: string;
+    learningTime: string;
+    currentSkills?: string[];
+  }): Promise<ApiResponse<any>> {
+    return apiRequest('/api/roadmap/generate', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  // Get all roadmaps for current user
+  async getRoadmaps(): Promise<ApiResponse<any[]>> {
+    return apiRequest('/api/roadmap', {
+      method: 'GET',
+    });
+  },
+
+  // Get a specific roadmap by ID
+  async getRoadmapById(id: string): Promise<ApiResponse<any>> {
+    return apiRequest(`/api/roadmap/${id}`, {
+      method: 'GET',
+    });
+  },
+
+  // Delete a roadmap
+  async deleteRoadmap(id: string): Promise<ApiResponse<void>> {
+    return apiRequest(`/api/roadmap/${id}`, {
+      method: 'DELETE',
+    });
+  },
+};
+
 // Export everything
 export default {
   auth: authAPI,
@@ -447,4 +484,5 @@ export default {
   resources: resourcesAPI,
   dashboard: dashboardAPI,
   ai: aiAPI,
+  roadmap: roadmapAPI,
 };

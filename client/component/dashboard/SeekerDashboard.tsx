@@ -12,6 +12,7 @@ import {
   CartesianGrid, Tooltip, ResponsiveContainer 
 } from 'recharts';
 import DashboardAISuggestions from "../DashboardAISuggestions";
+import RoadmapGenerator from "../RoadmapGenerator";
 
 interface SeekerDashboardProps {
   data: any;
@@ -245,6 +246,33 @@ export function SeekerDashboard({ data }: SeekerDashboardProps) {
         {/* AI-Powered Suggestions Section - Replaces Recent Activity */}
         <div className="mb-8">
           <DashboardAISuggestions />
+        </div>
+
+        {/* Quick Actions Section */}
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-xl p-6 mb-8 text-white">
+          <h3 className="text-xl font-bold mb-4">🚀 Accelerate Your Career</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <p className="text-blue-100 mb-3">
+                Get a personalized, AI-powered roadmap to achieve your dream career in just a few clicks!
+              </p>
+              <ul className="text-sm text-blue-100 space-y-1 mb-4">
+                <li>• Step-by-step learning path</li>
+                <li>• Skill recommendations</li>
+                <li>• Project ideas & resources</li>
+                <li>• Career advice from AI</li>
+              </ul>
+            </div>
+            <div className="flex items-center justify-center">
+              <RoadmapGenerator 
+                trigger={
+                  <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50 shadow-lg hover:shadow-xl transition-all font-semibold">
+                    Generate My Roadmap
+                  </Button>
+                }
+              />
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

@@ -10,6 +10,7 @@ import resourceRoutes from './routes/resources.js'
 import dashboardRoutes from './routes/dashboard.js'
 import aiRoutes from './routes/ai.js'
 import suggestionRoutes from './routes/suggestions.js'
+import roadmapRoutes from './routes/roadmap.js'
 
 dotenv.config()
 
@@ -69,6 +70,7 @@ app.use('/api/resources', resourceRoutes)
 app.use('/api/dashboard', dashboardRoutes)
 app.use('/api/ai', aiRoutes)
 app.use('/api/suggestions', suggestionRoutes)
+app.use('/api/roadmap', roadmapRoutes)
 
 // Global error handler
 app.use((error, req, res, next) => {
