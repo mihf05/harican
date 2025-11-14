@@ -22,7 +22,7 @@ const resources = [
     id: 1,
     title: "Complete JavaScript Course for Beginners",
     platform: "YouTube",
-    url: "https://youtube.com/example",
+    url: "https://www.youtube.com/watch?v=EerdGm-ehJQ",
     relatedSkills: ["JavaScript", "Web Development", "Programming"],
     cost: "Free",
     rating: 4.8,
@@ -38,15 +38,15 @@ const resources = [
     id: 2,
     title: "React Development Masterclass",
     platform: "Udemy",
-    url: "https://udemy.com/example",
+    url: "https://www.udemy.com/course/complete-reactjs-masterclass/",
     relatedSkills: ["React", "JavaScript", "Frontend"],
     cost: "Paid",
-    price: "$49.99",
+    price: "$59.99",
     rating: 4.9,
     duration: "12 hours",
-    students: 25000,
+    students: 14108,
     type: "Video Course",
-    description: "Master React development with hooks, context, and modern patterns.",
+    description: "Become React Developer: React Core, Hooks, APIs,Routing, Context, Reducers, Redux, Firebase, Tailwind, Deployment & More",
     instructor: "Tech Guru",
     level: "Intermediate",
     lastUpdated: "1 month ago"
@@ -55,12 +55,12 @@ const resources = [
     id: 3,
     title: "Data Analysis with Python and Pandas",
     platform: "Coursera",
-    url: "https://coursera.org/example",
+    url: "https://www.coursera.org/specializations/packt-data-analysis-with-pandas-and-python?msockid=229e7fbea9ec675716ae698ba85e66e4",
     relatedSkills: ["Python", "Data Analysis", "Pandas", "Statistics"],
     cost: "Free",
-    rating: 4.7,
+    rating: 4.8,
     duration: "6 weeks",
-    students: 15000,
+    students: 2409,
     type: "Online Course",
     description: "Learn to analyze data using Python and popular libraries like Pandas and NumPy.",
     instructor: "Data Science Institute",
@@ -87,7 +87,7 @@ const resources = [
     id: 5,
     title: "Excel for Business Analytics",
     platform: "LinkedIn Learning",
-    url: "https://linkedin.com/learning",
+    url: "https://www.linkedin.com/learning/excel-for-business-analysts",
     relatedSkills: ["Excel", "Data Analysis", "Business Analytics", "Charts"],
     cost: "Paid",
     price: "$29.99/month",
@@ -120,7 +120,7 @@ const resources = [
     id: 7,
     title: "Communication Skills for Workplace",
     platform: "Coursera",
-    url: "https://coursera.org/communication",
+    url: "https://www.coursera.org/learn/communication-in-the-workplace?msockid=229e7fbea9ec675716ae698ba85e66e4",
     relatedSkills: ["Communication", "Presentation", "Leadership", "Teamwork"],
     cost: "Free",
     rating: 4.3,
@@ -268,10 +268,12 @@ export default function ResourcesPage() {
                     ))}
                   </div>
 
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                    Start Learning
-                    <ExternalLink className="ml-2 h-4 w-4" />
-                  </Button>
+                  <a href={resource.url} target="_blank" rel="noopener noreferrer" className="block w-full">
+                    <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                      Start Learning
+                      <ExternalLink className="ml-2 h-4 w-4" />
+                    </Button>
+                  </a>
                 </div>
               ))}
             </div>
