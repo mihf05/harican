@@ -15,12 +15,21 @@ export default function AIAssistantPage() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: 'Hello! 👋 I\'m your personalized career assistant. I have access to your profile, skills, and preferences, so I can provide tailored career advice just for you!\n\nI can help you with:\n• Finding jobs that match YOUR skills and experience\n• Personalized resume and CV feedback\n• Career path guidance based on YOUR background\n• Interview preparation tips\n• Skill recommendations for YOUR goals\n• Job search strategies\n\nWhat would you like to know?'
+      content: '👋 Hello! I\'m **CareerBot**, your AI career mentor powered by Harican.\n\n🎯 **My Mission:** Supporting UN SDG 8 (Decent Work and Economic Growth) by helping youth like you find meaningful employment opportunities.\n\n💡 **How I can help YOU:**\n• **Job Matching:** Find roles that fit YOUR skills and experience\n• **Career Guidance:** Get personalized advice based on YOUR profile\n• **Skill Development:** Learn what to study for YOUR career goals\n• **Resume Tips:** Improve YOUR CV with specific suggestions\n• **Interview Prep:** Practice and prepare for success\n• **Career Planning:** Map out YOUR path to your dream job\n\n⚠️ **Important Disclaimers:**\n• My suggestions are recommendations only - not guarantees\n• Job market conditions vary, and success depends on many factors\n• Always verify information and make informed decisions\n• I have access to your profile to give personalized advice\n\n**What would you like to know about your career journey?**'
     }
   ])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // Quick prompt suggestions
+  const quickPrompts = [
+    "Which roles fit my skills?",
+    "What should I learn to become a backend developer?",
+    "How can I improve my chances of getting an internship?",
+    "Review my CV and give suggestions",
+    "What are the best entry-level jobs for my profile?"
+  ]
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -80,8 +89,8 @@ export default function AIAssistantPage() {
             <Bot className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">AI Career Assistant</h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Powered by DeepSeek AI</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">CareerBot - AI Career Mentor</h1>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Powered by AI • Supporting SDG 8: Decent Work for Youth</p>
           </div>
         </div>
       </div>
@@ -109,7 +118,26 @@ export default function AIAssistantPage() {
                     : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-md border border-gray-200 dark:border-gray-700'
                 }`}
               >
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                <div className="text-sm leading-relaxed whitespace-pre-wrap space-y-2">
+                  {message.content.split('\n').map((line, i) => {
+                    // Handle bold text
+                    if (line.includes('**')) {
+                      const parts = line.split('**')
+                      return (
+                        <p key={i}>
+                          {parts.map((part, j) => 
+                            j % 2 === 1 ? <strong key={j}>{part}</strong> : part
+                          )}
+                        </p>
+                      )
+                    }
+                    // Handle bullet points
+                    if (line.trim().startsWith('•') || line.trim().startsWith('-')) {
+                      return <p key={i} className="ml-2">{line}</p>
+                    }
+                    return <p key={i}>{line}</p>
+                  })}
+                </div>
               </div>
 
               {message.role === 'user' && (
@@ -134,6 +162,28 @@ export default function AIAssistantPage() {
           <div ref={messagesEndRef} />
         </div>
       </div>
+
+      {/* Quick Prompts - Show only when no user messages yet */}
+      {messages.length === 1 && !isLoading && (
+        <div className="px-4 py-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+          <div className="max-w-4xl mx-auto">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 font-medium">
+              Quick Questions:
+            </p>
+            <div className="flex gap-2 flex-wrap">
+              {quickPrompts.map((prompt, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setInput(prompt)}
+                  className="px-3 py-1.5 text-xs bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors border border-blue-200 dark:border-blue-800"
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Input Area */}
       <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-4 shadow-lg">

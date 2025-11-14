@@ -431,10 +431,77 @@ export const aiAPI = {
   async sendChatMessage(
     message: string,
     conversationHistory?: Array<{ role: string; content: string }>
-  ): Promise<ApiResponse<{ response: string; model: string }>> {
+  ): Promise<ApiResponse<{ response: string; model: string; jobsFound?: boolean }>> {
     return apiRequest('/api/ai/chat', {
       method: 'POST',
       body: JSON.stringify({ message, conversationHistory }),
+    });
+  },
+
+  // Extract skills from CV text
+  async extractSkillsFromCV(cvText?: string): Promise<ApiResponse<{
+    skills: Array<{ name: string; category: string; proficiency: string }>;
+    technologies: Array<{ name: string; type: string }>;
+    roles: Array<{ title: string; relevance: string }>;
+    experience_level: string;
+    domains: string[];
+    summary: string;
+    totalSkillsFound: number;
+  }>> {
+    return apiRequest('/api/ai/extract-skills', {
+      method: 'POST',
+      body: JSON.stringify({ cvText }),
+    });
+  },
+
+  // Generate CV improvement suggestions
+  async generateCVSuggestions(): Promise<ApiResponse<{
+    professionalSummary: string;
+    strongBulletPoints: string[];
+    skillsToHighlight: string[];
+    missingKeywords: string[];
+    formatSuggestions: string[];
+    linkedinTips: string[];
+    portfolioSuggestions: string[];
+    overallScore: number;
+    strengths: string[];
+    areasForImprovement: string[];
+  }>> {
+    return apiRequest('/api/ai/cv-suggestions', {
+      method: 'POST',
+    });
+  },
+
+  // Generate formatted CV
+  async generateCV(template?: string): Promise<ApiResponse<{
+    cvData: {
+      personalInfo: {
+        name: string;
+        email: string;
+        phone: string;
+        bio: string;
+        profileImage?: string;
+      };
+      education: {
+        level?: string;
+        department?: string;
+      };
+      experience: {
+        level?: string;
+        cvText: string;
+      };
+      skills: Array<{ name: string; level?: string }>;
+      careerGoals: {
+        preferredTrack?: string;
+      };
+      professionalSummary: string;
+    };
+    template: string;
+    generatedAt: string;
+  }>> {
+    return apiRequest('/api/ai/generate-cv', {
+      method: 'POST',
+      body: JSON.stringify({ template }),
     });
   },
 };

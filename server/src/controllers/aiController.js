@@ -85,7 +85,7 @@ export const sendChatMessage = async (req, res) => {
     };
 
     // Create system prompt with user context
-    const systemPrompt = `You are a helpful career assistant for Harican, a platform helping youth find job opportunities. You are currently helping ${userContext.name}, a job seeker.
+    const systemPrompt = `You are CareerBot, an AI mentor assistant for Harican - a platform dedicated to promoting decent work and economic growth (UN SDG 8) for youth in Bangladesh. You are currently helping ${userContext.name}, a job seeker.
 
 USER PROFILE:
 - Name: ${userContext.name}
@@ -96,6 +96,18 @@ USER PROFILE:
 - Skills: ${userContext.skills || 'No skills added yet'}
 - Bio: ${userContext.bio || 'No bio provided'}
 ${userContext.cvText ? `- CV/Resume Content: ${userContext.cvText.substring(0, 1000)}${userContext.cvText.length > 1000 ? '...' : ''}` : ''}
+
+IMPORTANT DISCLAIMERS:
+⚠️ All suggestions and advice are recommendations only and do not guarantee specific outcomes.
+⚠️ Job market conditions vary, and success depends on multiple factors beyond our control.
+⚠️ You should verify all information and make informed decisions based on your unique situation.
+
+YOUR MISSION (SDG 8 - Decent Work and Economic Growth):
+- Promote full and productive employment for youth
+- Support skill development and employability
+- Encourage entrepreneurship and economic participation
+- Advocate for equal opportunities regardless of gender, background, or disability
+- Focus on sustainable and decent work opportunities
 
 INSTRUCTIONS:
 1. Use the user's profile information to provide personalized career advice
@@ -220,6 +232,199 @@ You can mention these specific opportunities to the user if relevant to their qu
         stack: error.stack,
         response: error.response?.data
       } : undefined
+    });
+  }
+};
+
+/**
+ * Generate CV improvement suggestions based on user profile
+ */
+export const generateCVSuggestions = async (req, res) => {
+  try {
+    const userProfile = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      include: {
+        skills: {
+          select: {
+            skillName: true,
+            level: true
+          }
+        }
+      }
+    });
+
+    if (!userProfile.cvText || userProfile.cvText.trim().length < 50) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please upload or add CV content to your profile first.'
+      });
+    }
+
+    const suggestionPrompt = `You are an expert career counselor and resume consultant. Analyze this CV and provide specific, actionable improvement suggestions.
+
+USER PROFILE:
+- Name: ${userProfile.fullName}
+- Education: ${userProfile.educationLevel || 'Not specified'}
+- Department: ${userProfile.department || 'Not specified'}
+- Experience Level: ${userProfile.experienceLevel || 'Not specified'}
+- Career Track: ${userProfile.preferredCareerTrack || 'Not specified'}
+- Current Skills: ${userProfile.skills.map(s => s.skillName).join(', ') || 'None listed'}
+
+CURRENT CV/RESUME:
+${userProfile.cvText}
+
+TASK: Provide detailed CV improvement suggestions in the following JSON format:
+
+{
+  "professionalSummary": "A strong 2-3 sentence professional summary tailored to their goals",
+  "strongBulletPoints": [
+    "Example: Led team of 5 developers to deliver project 2 weeks ahead of schedule, increasing efficiency by 30%",
+    "Example: Developed automated testing framework reducing bug detection time by 50%"
+  ],
+  "skillsToHighlight": ["skill1", "skill2", "skill3"],
+  "missingKeywords": ["keyword1", "keyword2"],
+  "formatSuggestions": [
+    "Use action verbs like 'Led', 'Developed', 'Implemented'",
+    "Quantify achievements with numbers and percentages"
+  ],
+  "linkedinTips": [
+    "Add a professional headline",
+    "Request recommendations from colleagues"
+  ],
+  "portfolioSuggestions": [
+    "Create a GitHub profile showcasing your projects",
+    "Build a personal website with case studies"
+  ],
+  "overallScore": 7.5,
+  "strengths": ["strength1", "strength2"],
+  "areasForImprovement": ["area1", "area2"]
+}
+
+Focus on practical, youth-friendly advice aligned with SDG 8 goals. Return ONLY valid JSON.`;
+
+    const aiResponse = await callGeminiAPI([
+      {
+        role: 'user',
+        content: suggestionPrompt
+      }
+    ]);
+
+    // Parse JSON response
+    let suggestions;
+    try {
+      const jsonMatch = aiResponse.match(/```json\n([\s\S]*?)\n```/) || aiResponse.match(/```\n([\s\S]*?)\n```/);
+      const jsonString = jsonMatch ? jsonMatch[1] : aiResponse;
+      suggestions = JSON.parse(jsonString);
+    } catch (parseError) {
+      console.error('JSON Parse Error:', parseError);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to parse AI response',
+        rawResponse: aiResponse
+      });
+    }
+
+    res.json({
+      success: true,
+      data: suggestions
+    });
+
+  } catch (error) {
+    console.error('CV Suggestions Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to generate CV suggestions',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
+/**
+ * Generate a formatted CV/Resume based on user profile
+ */
+export const generateCV = async (req, res) => {
+  try {
+    const { template = 'professional' } = req.body;
+
+    const userProfile = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      include: {
+        skills: {
+          select: {
+            skillName: true,
+            level: true
+          }
+        }
+      }
+    });
+
+    // Build CV data structure
+    const cvData = {
+      personalInfo: {
+        name: userProfile.fullName,
+        email: userProfile.email,
+        phone: userProfile.phone,
+        bio: userProfile.bio || '',
+        profileImage: userProfile.profileImage
+      },
+      education: {
+        level: userProfile.educationLevel,
+        department: userProfile.department
+      },
+      experience: {
+        level: userProfile.experienceLevel,
+        cvText: userProfile.cvText || ''
+      },
+      skills: userProfile.skills.map(s => ({
+        name: s.skillName,
+        level: s.level
+      })),
+      careerGoals: {
+        preferredTrack: userProfile.preferredCareerTrack
+      }
+    };
+
+    // Generate professional summary using AI if not exists
+    let professionalSummary = '';
+    if (!userProfile.bio || userProfile.bio.length < 50) {
+      const summaryPrompt = `Generate a professional 2-3 sentence summary for a CV based on this profile:
+      
+Name: ${userProfile.fullName}
+Education: ${userProfile.educationLevel} in ${userProfile.department}
+Experience Level: ${userProfile.experienceLevel}
+Career Goal: ${userProfile.preferredCareerTrack}
+Skills: ${userProfile.skills.map(s => s.skillName).join(', ')}
+
+Make it compelling and youth-focused. Return only the summary text, no additional formatting.`;
+
+      professionalSummary = await callGeminiAPI([
+        {
+          role: 'user',
+          content: summaryPrompt
+        }
+      ]);
+    } else {
+      professionalSummary = userProfile.bio;
+    }
+
+    cvData.professionalSummary = professionalSummary.trim();
+
+    // Return CV data that can be rendered on frontend
+    res.json({
+      success: true,
+      data: {
+        cvData,
+        template,
+        generatedAt: new Date().toISOString()
+      }
+    });
+
+  } catch (error) {
+    console.error('CV Generation Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to generate CV',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };
