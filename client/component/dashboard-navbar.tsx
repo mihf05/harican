@@ -2,7 +2,7 @@
 import { useMediaQuery } from "@/hooks/use-media-query";
 import ThemeSwitch from "@/lib/theme";
 import { cn } from "@/lib/utils";
-import { AlignJustify, X, Briefcase, BookOpen, User, LogOut, LayoutDashboard, Plus, Home } from "lucide-react";
+import { AlignJustify, X, Briefcase, BookOpen, User, LogOut, LayoutDashboard, Plus, Home, Bot, MapIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -27,6 +27,8 @@ export default function DashboardNavbar() {
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/jobs", label: "Find Jobs", icon: Briefcase },
     { href: "/resources", label: "Resources", icon: BookOpen },
+    { href: "/ai-assistant", label: "AI Assistant", icon: Bot },
+    { href: "/roadmaps", label: "Career Roadmap", icon: MapIcon },
     ...(user?.role === 'POSTER' || user?.role === 'ADMIN' 
       ? [{ href: "/post-job", label: "Post Job", icon: Plus }] 
       : []
@@ -130,7 +132,7 @@ export default function DashboardNavbar() {
                           setIsOpen(false);
                         }}
                         variant="outline"
-                        className="w-full gap-2"
+                        className="bg-red-500 text-white w-full gap-2 border-transparent dark:border-transparent"
                       >
                         <LogOut className="h-4 w-4" />
                         Logout
@@ -198,7 +200,7 @@ export default function DashboardNavbar() {
                 <Button
                   onClick={handleLogout}
                   variant="outline"
-                  className="h-10 gap-2"
+                  className="bg-red-500 text-white h-10 gap-2 border-transparent dark:border-transparent"
                 >
                   <LogOut className="h-4 w-4" />
                   <span>Logout</span>

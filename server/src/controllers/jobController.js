@@ -1,5 +1,6 @@
 import { prisma } from '../lib/prisma.js';
 import { z } from 'zod';
+import { calculateJobMatch, getExternalJobPlatformLinks } from '../services/jobMatchingService.js';
 
 const jobSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -306,55 +307,95 @@ export const jobController = {
         orderBy: { createdAt: 'desc' }
       });
 
-      // Simple matching logic: calculate match score for each job
-      const jobsWithScore = allJobs.map(job => {
-        let score = 0;
-        const matchedSkills = [];
-
-        // Match skills
-        job.skills.forEach(jobSkill => {
-          if (userSkills.some(userSkill => 
-            userSkill.toLowerCase() === jobSkill.toLowerCase()
-          )) {
-            score += 10;
-            matchedSkills.push(jobSkill);
-          }
-        });
-
-        // Match career track (if title or description contains preferred track)
-        if (preferredTrack) {
-          const trackLower = preferredTrack.toLowerCase();
-          if (job.title.toLowerCase().includes(trackLower) || 
-              (job.description && job.description.toLowerCase().includes(trackLower))) {
-            score += 5;
-          }
-        }
-
-        // Match experience level
-        if (user.experienceLevel && job.experienceLevel === user.experienceLevel) {
-          score += 3;
-        }
+      // Enhanced matching logic with detailed scoring
+      const jobsWithMatch = allJobs.map(job => {
+        const matchData = calculateJobMatch(job, user);
+        const platformLinks = getExternalJobPlatformLinks(job);
 
         return {
           ...job,
-          matchScore: score,
-          matchedSkills,
-          matchReason: matchedSkills.length > 0 
-            ? `Matches: ${matchedSkills.join(', ')}` 
-            : 'General recommendation'
+          matchPercentage: matchData.matchPercentage,
+          matchQuality: matchData.matchQuality,
+          matchedSkills: matchData.matchedSkills,
+          missingSkills: matchData.missingSkills,
+          matchReasons: matchData.matchReasons,
+          recommendations: matchData.recommendations,
+          breakdown: matchData.breakdown,
+          externalPlatforms: platformLinks
         };
       });
 
-      // Filter jobs with score > 0 and sort by score
-      const recommendedJobs = jobsWithScore
-        .filter(job => job.matchScore > 0)
-        .sort((a, b) => b.matchScore - a.matchScore)
-        .slice(0, 10); // Top 10 recommendations
+      // Filter jobs with match percentage > 30 and sort by match percentage
+      const recommendedJobs = jobsWithMatch
+        .filter(job => job.matchPercentage >= 30)
+        .sort((a, b) => b.matchPercentage - a.matchPercentage)
+        .slice(0, 20); // Top 20 recommendations
 
       res.json({
         success: true,
         data: recommendedJobs,
-        totalMatches: recommendedJobs.length
+        totalMatches: recommendedJobs.length,
+        userProfile: {
+          skills: user.skills.length,
+          experienceLevel: user.experienceLevel,
+          preferredCareerTrack: user.preferredCareerTrack
+        }
+      });
+    } catch (error) {
+      console.error('Get recommended jobs error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch recommended jobs',
+        error: error.message
+      });
+    }
+  },
+
+  // Get job match details for a specific job
+  async getJobMatch(req, res) {
+    try {
+      const { id } = req.params;
+
+      // Get user with skills
+      const user = await prisma.user.findUnique({
+        where: { id: req.user.id },
+        include: { skills: true }
+      });
+
+      // Get job
+      const job = await prisma.job.findUnique({
+        where: { id },
+        include: {
+          postedBy: {
+            select: {
+              id: true,
+              fullName: true,
+              email: true
+            }
+          }
+        }
+      });
+
+      if (!job) {
+        return res.status(404).json({
+          success: false,
+          message: 'Job not found'
+        });
+      }
+
+      // Calculate match
+      const matchData = calculateJobMatch(job, user);
+      const platformLinks = getExternalJobPlatformLinks(job);
+
+      res.json({
+        success: true,
+        data: {
+          job,
+          match: {
+            ...matchData,
+            externalPlatforms: platformLinks
+          }
+        }
       });
     } catch (error) {
       console.error('Get recommended jobs error:', error);

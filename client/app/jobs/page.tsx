@@ -2,6 +2,12 @@
 import React, { useState } from "react";
 import { Button } from "@/component/ui/button";
 import { Input } from "@/component/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/component/ui/dialog";
 import { 
   Search, 
   MapPin, 
@@ -11,7 +17,8 @@ import {
   Briefcase, 
   Filter,
   ExternalLink,
-  DollarSign
+  DollarSign,
+  X
 } from "lucide-react";
 
 const jobs = [
@@ -92,6 +99,7 @@ export default function JobsPage() {
   const [selectedType, setSelectedType] = useState("all");
   const [selectedExperience, setSelectedExperience] = useState("all");
   const [sortBy, setSortBy] = useState("recent");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const jobTypes = ["all", "Full-time", "Part-time", "Internship", "Freelance"];
   const experienceLevels = ["all", "Fresher", "Entry Level", "Junior", "Mid"];
@@ -139,55 +147,146 @@ export default function JobsPage() {
               Discover jobs that match your skills and career goals. Start building your future today.
             </p>
           </div>
-
-          {/* Search and Filters */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
+            {/* Search and Filters */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
             <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 flex gap-2 items-center">
               <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                <Input
-                  type="text"
-                  placeholder="Search jobs, companies, or skills..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <Input
+                type="text"
+                placeholder="Search jobs, companies, or skills..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
               </div>
               
-              <select
-                value={selectedType}
-                onChange={(e) => setSelectedType(e.target.value)}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700"
+              {/* Mobile Filter Button */}
+              <div className="md:hidden">
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2 px-4"
+                onClick={() => setIsFilterOpen(true)}
               >
-                {jobTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {type === "all" ? "All Types" : type}
-                  </option>
-                ))}
+                <Filter className="h-5 w-5 text-gray-400" />
+              </Button>
+              </div>
+              </div>
+              
+              {/* Desktop Filters */}
+              <div className="hidden md:flex gap-4">
+              <select
+              value={selectedType}
+              onChange={(e) => setSelectedType(e.target.value)}
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700"
+              >
+              {jobTypes.map((type) => (
+              <option key={type} value={type}>
+                {type === "all" ? "All Types" : type}
+              </option>
+              ))}
               </select>
 
               <select
-                value={selectedExperience}
-                onChange={(e) => setSelectedExperience(e.target.value)}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700"
+              value={selectedExperience}
+              onChange={(e) => setSelectedExperience(e.target.value)}
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700"
               >
-                {experienceLevels.map((level) => (
-                  <option key={level} value={level}>
-                    {level === "all" ? "All Levels" : level}
-                  </option>
-                ))}
+              {experienceLevels.map((level) => (
+              <option key={level} value={level}>
+                {level === "all" ? "All Levels" : level}
+              </option>
+              ))}
               </select>
 
               <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700"
               >
-                <option value="recent">Most Recent</option>
-                <option value="applications">Most Applied</option>
+              <option value="recent">Most Recent</option>
+              <option value="applications">Most Applied</option>
               </select>
+              </div>
             </div>
-          </div>
+            </div>
+
+          {/* Filter Modal Dialog */}
+          <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Filters</DialogTitle>
+              </DialogHeader>
+              
+              <div className="space-y-6">
+                {/* Job Type Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-900 dark:text-white mb-3">
+                    Job Type
+                  </label>
+                  <select
+                    value={selectedType}
+                    onChange={(e) => {
+                      setSelectedType(e.target.value);
+                    }}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  >
+                    {jobTypes.map((type) => (
+                      <option key={type} value={type}>
+                        {type === "all" ? "All Types" : type}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Experience Level Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-900 dark:text-white mb-3">
+                    Experience Level
+                  </label>
+                  <select
+                    value={selectedExperience}
+                    onChange={(e) => {
+                      setSelectedExperience(e.target.value);
+                    }}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  >
+                    {experienceLevels.map((level) => (
+                      <option key={level} value={level}>
+                        {level === "all" ? "All Levels" : level}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Sort By Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-900 dark:text-white mb-3">
+                    Sort By
+                  </label>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => {
+                      setSortBy(e.target.value);
+                    }}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  >
+                    <option value="recent">Most Recent</option>
+                    <option value="applications">Most Applied</option>
+                  </select>
+                </div>
+
+                {/* Apply Button */}
+                <Button 
+                  onClick={() => setIsFilterOpen(false)}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  Apply Filters
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
 
           {/* Results Count */}
           <div className="mb-6">
@@ -197,15 +296,15 @@ export default function JobsPage() {
           </div>
 
           {/* Job Listings */}
-          <div className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
             {filteredJobs.map((job) => {
               const matchingSkills = getMatchingSkills(job);
               return (
                 <div
                   key={job.id}
-                  className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow p-6"
+                  className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 flex flex-col"
                 >
-                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between">
+                  <div className="flex flex-col gap-4 h-full">
                     <div className="flex-1">
                       <div className="flex items-start justify-between mb-4">
                         <div>
@@ -282,12 +381,12 @@ export default function JobsPage() {
                       </div>
                     </div>
 
-                    <div className="lg:ml-6 flex flex-col space-y-2">
-                      <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                    <div className="flex flex-col gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                      <Button className="bg-blue-600 hover:bg-blue-700 text-white w-full">
                         Apply Now
                         <ExternalLink className="ml-2 h-4 w-4" />
                       </Button>
-                      <Button variant="outline">
+                      <Button variant="outline" className="w-full">
                         Save Job
                       </Button>
                     </div>

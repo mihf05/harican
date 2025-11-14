@@ -10,6 +10,7 @@ router.get('/:id', jobController.getJobById);
 
 // Protected routes (require authentication)
 router.get('/recommended/me', authenticate, jobController.getRecommendedJobs);
+router.get('/match/:id', authenticate, jobController.getJobMatch);
 
 // Poster/Admin only routes
 router.post('/', authenticate, authorize(['POSTER', 'ADMIN']), jobController.createJob);

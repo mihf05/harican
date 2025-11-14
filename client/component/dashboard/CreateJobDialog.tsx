@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/component/ui/dialog";
 import { Button } from "@/component/ui/button";
 import { Input } from "@/component/ui/input";
@@ -127,55 +127,58 @@ export function CreateJobDialog({ trigger, onJobCreated }: CreateJobDialogProps)
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto backdrop-blur-md bg-white/10 border border-white/20 shadow-xl [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/30 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-white/50">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">Create New Job Posting</DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-white">Create New Job Posting</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6 mt-4">
           {error && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-              <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
+            <div className="bg-red-500/20 border border-red-400/50 rounded-lg p-4 backdrop-blur-sm">
+              <p className="text-red-100 text-sm">{error}</p>
             </div>
           )}
 
           {/* Basic Information */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-lg">Basic Information</h3>
+            <h3 className="font-semibold text-lg text-white">Basic Information</h3>
             
             <div>
-              <Label htmlFor="title">Job Title *</Label>
+              <Label htmlFor="title" className="text-white">Job Title *</Label>
               <Input
                 id="title"
                 name="title"
                 value={formData.title}
                 onChange={handleInputChange}
                 placeholder="e.g. Senior Web Developer"
+                className="bg-white/10 border border-white/20 text-white placeholder:text-white/50"
                 required
               />
             </div>
 
             <div>
-              <Label htmlFor="company">Company Name *</Label>
+              <Label htmlFor="company" className="text-white">Company Name *</Label>
               <Input
                 id="company"
                 name="company"
                 value={formData.company}
                 onChange={handleInputChange}
                 placeholder="e.g. Tech Solutions Ltd"
+                className="bg-white/10 border border-white/20 text-white placeholder:text-white/50"
                 required
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="location">Location *</Label>
+                <Label htmlFor="location" className="text-white">Location *</Label>
                 <Input
                   id="location"
                   name="location"
                   value={formData.location}
                   onChange={handleInputChange}
                   placeholder="e.g. Dhaka, Bangladesh"
+                  className="bg-white/10 border border-white/20 text-white placeholder:text-white/50"
                   required
                 />
               </div>
@@ -187,72 +190,74 @@ export function CreateJobDialog({ trigger, onJobCreated }: CreateJobDialogProps)
                     name="isRemote"
                     checked={formData.isRemote}
                     onChange={handleInputChange}
-                    className="w-4 h-4 rounded border-gray-300"
+                    className="w-4 h-4 rounded border-white/30 bg-white/10"
                   />
-                  <span className="text-sm font-medium">Remote Position</span>
+                  <span className="text-sm font-medium text-white">Remote Position</span>
                 </label>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="jobType">Job Type *</Label>
+                <Label htmlFor="jobType" className="text-white">Job Type *</Label>
                 <select
                   id="jobType"
                   name="jobType"
                   value={formData.jobType}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800"
+                  className="w-full px-3 py-2 border border-white/20 rounded-md bg-white/10 backdrop-blur-sm text-white"
                   required
                 >
-                  <option value="Internship">Internship</option>
-                  <option value="Part-time">Part-time</option>
-                  <option value="Full-time">Full-time</option>
-                  <option value="Freelance">Freelance</option>
+                  <option value="Internship" className="bg-gray-800">Internship</option>
+                  <option value="Part-time" className="bg-gray-800">Part-time</option>
+                  <option value="Full-time" className="bg-gray-800">Full-time</option>
+                  <option value="Freelance" className="bg-gray-800">Freelance</option>
                 </select>
               </div>
 
               <div>
-                <Label htmlFor="experienceLevel">Experience Level *</Label>
+                <Label htmlFor="experienceLevel" className="text-white">Experience Level *</Label>
                 <select
                   id="experienceLevel"
                   name="experienceLevel"
                   value={formData.experienceLevel}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800"
+                  className="w-full px-3 py-2 border border-white/20 rounded-md bg-white/10 backdrop-blur-sm text-white"
                   required
                 >
-                  <option value="Fresher">Fresher</option>
-                  <option value="Junior">Junior</option>
-                  <option value="Mid">Mid-level</option>
-                  <option value="Senior">Senior</option>
+                  <option value="Fresher" className="bg-gray-800">Fresher</option>
+                  <option value="Junior" className="bg-gray-800">Junior</option>
+                  <option value="Mid" className="bg-gray-800">Mid-level</option>
+                  <option value="Senior" className="bg-gray-800">Senior</option>
                 </select>
               </div>
             </div>
 
             <div>
-              <Label htmlFor="salary">Salary Range</Label>
+              <Label htmlFor="salary" className="text-white">Salary Range</Label>
               <Input
                 id="salary"
                 name="salary"
                 value={formData.salary}
                 onChange={handleInputChange}
                 placeholder="e.g. ৳30,000 - ৳50,000/month"
+                className="bg-white/10 border border-white/20 text-white placeholder:text-white/50"
               />
             </div>
           </div>
 
           {/* Skills */}
           <div className="space-y-3">
-            <h3 className="font-semibold text-lg">Required Skills *</h3>
+            <h3 className="font-semibold text-lg text-white">Required Skills *</h3>
             <div className="flex gap-2">
               <Input
                 value={currentSkill}
                 onChange={(e) => setCurrentSkill(e.target.value)}
                 placeholder="Add a skill (e.g. JavaScript)"
                 onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addSkill())}
+                className="bg-white/10 border border-white/20 text-white placeholder:text-white/50"
               />
-              <Button type="button" onClick={addSkill} variant="outline">
+              <Button type="button" onClick={addSkill} className="bg-blue-600 hover:bg-blue-700 text-white border-0">
                 Add
               </Button>
             </div>
@@ -261,13 +266,13 @@ export function CreateJobDialog({ trigger, onJobCreated }: CreateJobDialogProps)
                 {skills.map((skill) => (
                   <span
                     key={skill}
-                    className="inline-flex items-center gap-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 px-3 py-1 rounded-full text-sm"
+                    className="inline-flex items-center gap-1 bg-blue-400/30 text-white px-3 py-1 rounded-full text-sm border border-blue-300/50"
                   >
                     {skill}
                     <button
                       type="button"
                       onClick={() => removeSkill(skill)}
-                      className="hover:bg-blue-200 dark:hover:bg-blue-800 rounded-full p-0.5"
+                      className="hover:bg-blue-300/30 rounded-full p-0.5"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -279,15 +284,16 @@ export function CreateJobDialog({ trigger, onJobCreated }: CreateJobDialogProps)
 
           {/* Requirements */}
           <div className="space-y-3">
-            <h3 className="font-semibold text-lg">Job Requirements</h3>
+            <h3 className="font-semibold text-lg text-white">Job Requirements</h3>
             <div className="flex gap-2">
               <Input
                 value={currentRequirement}
                 onChange={(e) => setCurrentRequirement(e.target.value)}
                 placeholder="Add a requirement"
                 onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addRequirement())}
+                className="bg-white/10 border border-white/20 text-white placeholder:text-white/50"
               />
-              <Button type="button" onClick={addRequirement} variant="outline">
+              <Button type="button" onClick={addRequirement} className="bg-blue-600 hover:bg-blue-700 text-white border-0">
                 Add
               </Button>
             </div>
@@ -295,13 +301,13 @@ export function CreateJobDialog({ trigger, onJobCreated }: CreateJobDialogProps)
               <ul className="space-y-2">
                 {requirements.map((req, index) => (
                   <li key={index} className="flex items-start gap-2 text-sm">
-                    <span className="flex-1 p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                    <span className="flex-1 p-2 bg-white/10 rounded border border-white/10 text-white">
                       {req}
                     </span>
                     <button
                       type="button"
                       onClick={() => removeRequirement(req)}
-                      className="text-red-600 hover:text-red-700 p-2"
+                      className="text-red-300 hover:text-red-200 p-2"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -313,7 +319,7 @@ export function CreateJobDialog({ trigger, onJobCreated }: CreateJobDialogProps)
 
           {/* Description */}
           <div>
-            <Label htmlFor="description">Job Description</Label>
+            <Label htmlFor="description" className="text-white">Job Description</Label>
             <textarea
               id="description"
               name="description"
@@ -321,13 +327,13 @@ export function CreateJobDialog({ trigger, onJobCreated }: CreateJobDialogProps)
               onChange={handleInputChange}
               placeholder="Describe the role, responsibilities, and what you're looking for..."
               rows={5}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800"
+              className="w-full px-3 py-2 border border-white/20 rounded-md bg-white/10 text-white placeholder:text-white/50"
             />
           </div>
 
           {/* Application URL */}
           <div>
-            <Label htmlFor="applicationUrl">Application URL</Label>
+            <Label htmlFor="applicationUrl" className="text-white">Application URL</Label>
             <Input
               id="applicationUrl"
               name="applicationUrl"
@@ -335,23 +341,24 @@ export function CreateJobDialog({ trigger, onJobCreated }: CreateJobDialogProps)
               value={formData.applicationUrl}
               onChange={handleInputChange}
               placeholder="https://example.com/apply"
+              className="bg-white/10 border border-white/20 text-white placeholder:text-white/50"
             />
           </div>
 
           {/* Submit Button */}
-          <div className="flex gap-3 justify-end pt-4 border-t">
+          <div className="flex gap-3 justify-end pt-4 border-t border-white/20">
             <Button
               type="button"
-              variant="outline"
               onClick={() => setOpen(false)}
               disabled={loading}
+              className="bg-red-600 hover:bg-red-700 text-white border-0"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={loading}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+              className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               {loading ? (
                 <>
@@ -365,8 +372,8 @@ export function CreateJobDialog({ trigger, onJobCreated }: CreateJobDialogProps)
                 </>
               )}
             </Button>
-          </div>
-        </form>
+      </div>
+      </form>
       </DialogContent>
     </Dialog>
   );

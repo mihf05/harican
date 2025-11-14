@@ -108,9 +108,9 @@ export default function HomeHeader({}: HomeHeaderProps) {
                           setIsOpen(false);
                         }}
                         variant="outline"
-                        className="w-full gap-2"
+                        className="bg-red-500 w-full gap-2"
                       >
-                        <LogOut className="h-4 w-4" />
+                        <LogOut className=" h-4 w-4" />
                         Logout
                       </Button>
                     </div>
@@ -185,7 +185,7 @@ export default function HomeHeader({}: HomeHeaderProps) {
               <Button
                 onClick={handleLogout}
                 variant="outline"
-                className="h-10 gap-2"
+                className="bg-red-500 h-10 gap-2"
               >
                 <LogOut className="h-4 w-4" />
                 <span className="hidden md:inline">Logout</span>
