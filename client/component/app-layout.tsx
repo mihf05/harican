@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import LandingNavbar from "@/component/landing-navbar";
 import DashboardNavbar from "@/component/dashboard-navbar";
 import { ProtectedRoute } from "@/component/protected-route";
+import Footer from "@/component/footer";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -27,22 +28,24 @@ export default function AppLayout({ children }: AppLayoutProps) {
   if (isDashboardRoute) {
     return (
       <ProtectedRoute>
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
           <DashboardNavbar />
-          <main className={pathname.startsWith('/dashboard') ? "max-w-screen-xl mx-auto px-4 py-8" : ""}>
+          <main className={pathname.startsWith('/dashboard') ? "max-w-screen-xl mx-auto px-4 py-8 flex-1" : "flex-1"}>
             {children}
           </main>
+          <Footer />
         </div>
       </ProtectedRoute>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
       <LandingNavbar />
-      <main className="pt-16">
+      <main className="pt-16 flex-1">
         {children}
       </main>
+      <Footer />
     </div>
   );
 }
