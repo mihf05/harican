@@ -154,6 +154,11 @@ async function apiRequest<T = any>(
     'Content-Type': 'application/json',
   };
 
+  const token = getAuthToken();
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   // Add custom headers if provided
   if (options.headers) {
     Object.assign(headers, options.headers);
@@ -169,7 +174,7 @@ async function apiRequest<T = any>(
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || 'An error occurred');
+      throw new Error(data.message);
     }
 
     return data;

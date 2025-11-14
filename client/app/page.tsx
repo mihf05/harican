@@ -4,7 +4,7 @@ import ShimmerButton from "@/component/ui/shimmer";
 import { cn } from "@/lib/utils";
 import { ChevronsRight } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import HomeHeader from "@/component/navber";
+import LandingNavbar from "@/component/landing-navbar";
 import NewItemsLoading from "@/component/new-product";
 import WordAnimator from "@/component/word-animation";
 
@@ -62,8 +62,8 @@ const index = () => {
   const words = ["Career ", "Growth ", "Success ", "Future "];
   return (
     <>
-      <HomeHeader />
-      <section className=" h-screen  overflow-hidden  relative pb-20 dark:bg-black bg-white  ">
+      <LandingNavbar />
+      <section className=" h-screen  overflow-hidden  relative pb-20 dark:bg-black bg-white  ">{/* ... */}
         <div className="absolute inset-0 -z-0 h-screen w-full  dark:bg-[radial-gradient(#1d1d1d_1px,transparent_1px)] bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]"></div>
         <div className="absolute inset-0 top-0 left-0  h-screen w-full items-center px-5 py-24  bg-gradient-to-t dark:from-[#050505] from-white from-0% to-transparent to-60%"></div>
 

@@ -166,14 +166,22 @@ export default function HomeHeader({}: HomeHeaderProps) {
                 href="/profile"
                 className="flex items-center gap-2 px-3 h-10 border dark:border-neutral-800 border-neutral-200 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors"
               >
-                <User className="h-4 w-4" />
-                <span className="text-sm hidden md:inline">{user?.fullName || "User"}</span>
-                {user?.role && (
-                  <span className="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded hidden lg:inline">
-                    {user.role}
-                  </span>
+              <div className="flex items-center gap-2">
+                {user?.profileImage ? (
+                  <img 
+                    src={user.profileImage} 
+                    alt={user.fullName} 
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
+                    {user?.fullName?.split(' ').pop()?.[0]?.toUpperCase() || 'U'}
+                  </div>
                 )}
+                <span className="text-sm hidden md:inline">{user?.fullName}</span>
+              </div>
               </Link>
+              
               <Button
                 onClick={handleLogout}
                 variant="outline"
