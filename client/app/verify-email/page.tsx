@@ -62,7 +62,7 @@ function VerifyEmailContent() {
                 Email Verified Successfully!
               </h2>
               <p className="mt-2 text-gray-600 dark:text-gray-400">
-                Welcome to ShikkhaConnect! Your account is now active and ready to use.
+                Welcome to Harican! Your account is now active and ready to use.
               </p>
             </div>
             <div className="space-y-3">
