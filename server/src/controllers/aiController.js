@@ -4,8 +4,6 @@ import { prisma } from '../lib/prisma.js';
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyAF7NQxhs9F7YEOtqa0GmV9VJw5-wJLUgU';
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
-console.log('🤖 Initializing Gemini with API key:', GEMINI_API_KEY ? `${GEMINI_API_KEY.substring(0, 15)}...` : 'NOT SET');
-
 // Helper function to call Gemini API
 async function callGeminiAPI(messages) {
   const prompt = messages.map(msg => {
