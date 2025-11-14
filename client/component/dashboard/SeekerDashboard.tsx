@@ -229,16 +229,16 @@ export function SeekerDashboard({ data }: SeekerDashboardProps) {
                 <Award className="h-4 w-4" />
                 Your Skills
               </span>
-              <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2">
                 {data.user.skills.map((skill: any) => (
                   <span
-                    key={skill.id}
-                    className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full text-sm font-medium shadow-md hover:shadow-lg transition-all hover:scale-105"
+                  key={skill.id}
+                  className="px-4 py-2 bg-white/10 dark:bg-white/5 backdrop-blur-md border border-white/20 dark:border-white/10 text-black dark:text-white rounded-lg text-sm font-medium shadow-lg hover:shadow-xl hover:bg-white/20 dark:hover:bg-white/10 transition-all hover:scale-105"
                   >
-                    {skill.skillName}
+                  {skill.skillName}
                   </span>
                 ))}
-              </div>
+                </div>
             </div>
           )}
         </div>

@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/component/ui/button";
 import { cn } from "@/lib/utils";
+import ThemeSwitch from "@/lib/theme";
 import { BookOpen, Eye, EyeOff, Mail, Phone } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -56,11 +57,15 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+      {/* Theme toggle (fixed top-right) */}
+      <div className="fixed top-4 right-4 z-50">
+        <ThemeSwitch className="border w-10 rounded-md h-10 dark:border-neutral-800 border-neutral-200" />
+      </div>
       <div className="max-w-md w-full space-y-8">
         <div>
           <div className="flex justify-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-blue-600 rounded-lg flex items-center justify-center">
-              <BookOpen className="h-10 w-10 text-white" />
+            <div className="w-56 h-56 rounded-lg flex items-center justify-center">
+              <img src="/logo.png" alt="Harican Logo" className="h-40 w-40 object-contain" />
             </div>
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
