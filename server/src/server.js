@@ -8,6 +8,8 @@ import profileRoutes from './routes/profile.js'
 import jobRoutes from './routes/jobs.js'
 import resourceRoutes from './routes/resources.js'
 import dashboardRoutes from './routes/dashboard.js'
+import aiRoutes from './routes/ai.js'
+import suggestionRoutes from './routes/suggestions.js'
 
 dotenv.config()
 
@@ -65,6 +67,8 @@ app.use('/api/profile', profileRoutes)
 app.use('/api/jobs', jobRoutes)
 app.use('/api/resources', resourceRoutes)
 app.use('/api/dashboard', dashboardRoutes)
+app.use('/api/ai', aiRoutes)
+app.use('/api/suggestions', suggestionRoutes)
 
 // Global error handler
 app.use((error, req, res, next) => {

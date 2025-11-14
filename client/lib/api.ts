@@ -425,6 +425,20 @@ export const dashboardAPI = {
   },
 };
 
+// AI Assistant API
+export const aiAPI = {
+  // Send a chat message to AI
+  async sendChatMessage(
+    message: string,
+    conversationHistory?: Array<{ role: string; content: string }>
+  ): Promise<ApiResponse<{ response: string; model: string }>> {
+    return apiRequest('/api/ai/chat', {
+      method: 'POST',
+      body: JSON.stringify({ message, conversationHistory }),
+    });
+  },
+};
+
 // Export everything
 export default {
   auth: authAPI,
@@ -432,4 +446,5 @@ export default {
   jobs: jobsAPI,
   resources: resourcesAPI,
   dashboard: dashboardAPI,
+  ai: aiAPI,
 };
