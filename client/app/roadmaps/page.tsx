@@ -29,16 +29,18 @@ interface Roadmap {
   currentSkills: string[]
   roadmapData: {
     phases: Array<{
-      phase: string
-      duration: string
-      focus: string
-      milestones: string[]
-      skills_to_learn: string[]
-      resources: string[]
-      projects: string[]
+      phase?: string
+      title?: string
+      duration?: string
+      focus?: string
+      description?: string
+      milestones?: string[]
+      skills_to_learn?: string[]
+      resources?: string[]
+      projects?: (string | { name?: string; [key: string]: any })[]
     }>
-    career_advice: string[]
-    application_timeline: string
+    career_advice?: string[]
+    application_timeline?: string
   }
   status: string
   createdAt: string
@@ -198,33 +200,33 @@ function RoadmapsContent() {
         ${roadmap.roadmapData.phases.map((phase, idx) => `
           <div class="phase">
             <div class="phase-header">
-              <h3 style="margin: 0; color: white;">Phase ${idx + 1}: ${phase.phase}</h3>
-              <p style="margin: 5px 0 0 0; opacity: 0.9;">${phase.duration}</p>
+              <h3 style="margin: 0; color: white;">Phase ${idx + 1}: ${phase?.phase || phase?.title || 'Phase'}</h3>
+              <p style="margin: 5px 0 0 0; opacity: 0.9;">${phase?.duration || 'TBD'}</p>
             </div>
-            <p><strong>Focus:</strong> ${phase.focus}</p>
+            <p><strong>Focus:</strong> ${phase?.focus || phase?.description || 'N/A'}</p>
             
-            ${phase.milestones.length > 0 ? `
+            ${phase?.milestones && phase.milestones.length > 0 ? `
               <h4>🎯 Milestones</h4>
               <ul>
                 ${phase.milestones.map(m => `<li>${m}</li>`).join('')}
               </ul>
             ` : ''}
             
-            ${phase.skills_to_learn.length > 0 ? `
+            ${phase?.skills_to_learn && phase.skills_to_learn.length > 0 ? `
               <h4>🛠️ Skills to Learn</h4>
               <div>
                 ${phase.skills_to_learn.map(s => `<span class="skill-tag">${s}</span>`).join('')}
               </div>
             ` : ''}
             
-            ${phase.projects.length > 0 ? `
+            ${phase?.projects && phase.projects.length > 0 ? `
               <h4>💡 Projects</h4>
               <ul>
-                ${phase.projects.map(p => `<li>${p}</li>`).join('')}
+                ${phase.projects.map(p => `<li>${typeof p === 'string' ? p : p?.name || 'Project'}</li>`).join('')}
               </ul>
             ` : ''}
             
-            ${phase.resources.length > 0 ? `
+            ${phase?.resources && phase.resources.length > 0 ? `
               <h4>📚 Resources</h4>
               <ul>
                 ${phase.resources.map(r => `<li>${r}</li>`).join('')}
@@ -233,7 +235,7 @@ function RoadmapsContent() {
           </div>
         `).join('')}
 
-        ${roadmap.roadmapData.career_advice?.length > 0 ? `
+        ${roadmap.roadmapData.career_advice && roadmap.roadmapData.career_advice.length > 0 ? `
           <div class="advice-box">
             <h2>💡 Career Advice</h2>
             <ul>
@@ -270,36 +272,36 @@ function RoadmapsContent() {
     text += `Generated: ${new Date(roadmap.createdAt).toLocaleDateString()}\n\n`
 
     roadmap.roadmapData.phases.forEach((phase, idx) => {
-      text += `\n${idx + 1}. ${phase.phase.toUpperCase()} (${phase.duration})\n`
+      text += `\n${idx + 1}. ${phase?.phase?.toUpperCase() || phase?.title?.toUpperCase() || 'PHASE'} (${phase?.duration || 'TBD'})\n`
       text += `${'-'.repeat(50)}\n`
-      text += `Focus: ${phase.focus}\n\n`
+      text += `Focus: ${phase?.focus || phase?.description || 'N/A'}\n\n`
 
-      if (phase.milestones.length > 0) {
+      if (phase?.milestones && phase.milestones.length > 0) {
         text += `Milestones:\n`
         phase.milestones.forEach(m => text += `  • ${m}\n`)
         text += `\n`
       }
 
-      if (phase.skills_to_learn.length > 0) {
+      if (phase?.skills_to_learn && phase.skills_to_learn.length > 0) {
         text += `Skills to Learn:\n`
         phase.skills_to_learn.forEach(s => text += `  • ${s}\n`)
         text += `\n`
       }
 
-      if (phase.projects.length > 0) {
+      if (phase?.projects && phase.projects.length > 0) {
         text += `Projects:\n`
-        phase.projects.forEach(p => text += `  • ${p}\n`)
+        phase.projects.forEach(p => text += `  • ${typeof p === 'string' ? p : p?.name || 'Project'}\n`)
         text += `\n`
       }
 
-      if (phase.resources.length > 0) {
+      if (phase?.resources && phase.resources.length > 0) {
         text += `Resources:\n`
         phase.resources.forEach(r => text += `  • ${r}\n`)
         text += `\n`
       }
     })
 
-    if (roadmap.roadmapData.career_advice?.length > 0) {
+    if (roadmap.roadmapData.career_advice && roadmap.roadmapData.career_advice.length > 0) {
       text += `\nCAREER ADVICE\n`
       text += `${'-'.repeat(50)}\n`
       roadmap.roadmapData.career_advice.forEach(advice => text += `• ${advice}\n`)
@@ -472,19 +474,19 @@ function RoadmapsContent() {
                             </div>
                             <div className="flex-1">
                               <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                                {phase.phase}
+                                {phase?.phase || phase?.title || 'Phase'}
                               </h3>
                               <p className="text-sm text-gray-600 dark:text-gray-400">
-                                {phase.duration}
+                                {phase?.duration || 'TBD'}
                               </p>
                             </div>
                           </div>
                           <p className="text-gray-700 dark:text-gray-300 mb-4 ml-11">
-                            {phase.focus}
+                            {phase?.focus || phase?.description || 'N/A'}
                           </p>
 
                           <div className="ml-11 space-y-3">
-                            {phase.milestones.length > 0 && (
+                            {phase?.milestones && phase.milestones.length > 0 && (
                               <div>
                                 <h4 className="font-semibold text-gray-900 dark:text-white mb-2 text-sm">
                                   Milestones
@@ -500,7 +502,7 @@ function RoadmapsContent() {
                               </div>
                             )}
 
-                            {phase.skills_to_learn.length > 0 && (
+                            {phase?.skills_to_learn && phase.skills_to_learn.length > 0 && (
                               <div>
                                 <h4 className="font-semibold text-gray-900 dark:text-white mb-2 text-sm">
                                   Skills to Learn
@@ -518,7 +520,7 @@ function RoadmapsContent() {
                               </div>
                             )}
 
-                            {phase.projects.length > 0 && (
+                            {phase?.projects && phase.projects.length > 0 && (
                               <div>
                                 <h4 className="font-semibold text-gray-900 dark:text-white mb-2 text-sm">
                                   Projects
@@ -526,15 +528,15 @@ function RoadmapsContent() {
                                 <ul className="space-y-1">
                                   {phase.projects.map((project, pIdx) => (
                                     <li key={pIdx} className="flex items-start gap-2 text-sm">
-                                      <Circle className="w-3 h-3 text-blue-600 mt-1 flex-shrink-0" />
-                                      <span className="text-gray-700 dark:text-gray-300">{project}</span>
+                                      <Target className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                                      <span className="text-gray-700 dark:text-gray-300">{typeof project === 'string' ? project : project?.name || 'Project'}</span>
                                     </li>
                                   ))}
                                 </ul>
                               </div>
                             )}
 
-                            {phase.resources.length > 0 && (
+                            {phase?.resources && phase.resources.length > 0 && (
                               <div>
                                 <h4 className="font-semibold text-gray-900 dark:text-white mb-2 text-sm">
                                   Resources
@@ -554,7 +556,7 @@ function RoadmapsContent() {
                     </div>
 
                     {/* Career Advice */}
-                    {roadmap.roadmapData.career_advice?.length > 0 && (
+                    {roadmap.roadmapData.career_advice && roadmap.roadmapData.career_advice.length > 0 && (
                       <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
                         <h3 className="font-bold text-gray-900 dark:text-white mb-3">
                           💡 Career Advice

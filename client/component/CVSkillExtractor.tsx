@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from './ui/button'
-import { Loader2, Sparkles, Upload, X, Check } from 'lucide-react'
+import { Loader2, Sparkles, X, Check } from 'lucide-react'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog'
 
 interface ExtractedSkill {
@@ -31,33 +31,27 @@ interface ExtractionResult {
 
 interface CVSkillExtractorProps {
   onSkillsExtracted: (skills: string[]) => void
-  currentCVText?: string
 }
 
-export default function CVSkillExtractor({ onSkillsExtracted, currentCVText }: CVSkillExtractorProps) {
+export default function CVSkillExtractor({ onSkillsExtracted }: CVSkillExtractorProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [cvText, setCvText] = useState(currentCVText || '')
   const [isExtracting, setIsExtracting] = useState(false)
   const [extractionResult, setExtractionResult] = useState<ExtractionResult | null>(null)
   const [selectedSkills, setSelectedSkills] = useState<Set<string>>(new Set())
 
   const handleExtract = async () => {
-    if (!cvText.trim() || cvText.trim().length < 50) {
-      alert('Please provide at least 50 characters of CV text')
-      return
-    }
-
     setIsExtracting(true)
     setExtractionResult(null)
 
     try {
+      // Extract from profile CV text directly - no need to send cvText in body
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/ai/extract-skills`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify({ cvText })
+        body: JSON.stringify({})
       })
 
       const data = await response.json()
@@ -98,18 +92,6 @@ export default function CVSkillExtractor({ onSkillsExtracted, currentCVText }: C
     setSelectedSkills(new Set())
   }
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        const text = event.target?.result as string
-        setCvText(text)
-      }
-      reader.readAsText(file)
-    }
-  }
-
   return (
     <>
       <Button
@@ -129,71 +111,32 @@ export default function CVSkillExtractor({ onSkillsExtracted, currentCVText }: C
               AI-Powered Skill Extraction
             </DialogTitle>
             <DialogDescription>
-              Upload your CV or paste the content to automatically extract skills, technologies, and relevant roles.
+              Automatically extract skills and technologies from your profile CV text using AI.
             </DialogDescription>
           </DialogHeader>
 
           {!extractionResult ? (
             <div className="space-y-4">
-              {/* File Upload */}
-              <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-6 text-center">
-                <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                  Upload a text-based CV file (.txt)
-                </p>
-                <input
-                  type="file"
-                  accept=".txt"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                  id="cv-upload"
-                />
-                <label htmlFor="cv-upload">
-                  <Button variant="outline" size="sm" asChild>
-                    <span>Choose File</span>
-                  </Button>
-                </label>
-              </div>
-
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300 dark:border-gray-700" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white dark:bg-gray-800 text-gray-500">OR</span>
-                </div>
-              </div>
-
-              {/* Text Area */}
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Paste Your CV Content
-                </label>
-                <textarea
-                  value={cvText}
-                  onChange={(e) => setCvText(e.target.value)}
-                  placeholder="Paste your CV or resume text here... (minimum 50 characters)"
-                  className="w-full h-64 p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-900"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  {cvText.length} characters
+              <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                <p className="text-sm text-blue-800 dark:text-blue-200">
+                  ✨ Click the button below to analyze your CV text from your profile and automatically extract all skills, technologies, and relevant roles.
                 </p>
               </div>
 
               <Button
                 onClick={handleExtract}
-                disabled={isExtracting || cvText.trim().length < 50}
+                disabled={isExtracting}
                 className="w-full gap-2"
               >
                 {isExtracting ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Analyzing CV with AI...
+                    Analyzing Your CV with AI...
                   </>
                 ) : (
                   <>
                     <Sparkles className="w-4 h-4" />
-                    Extract Skills & Roles
+                    Extract Skills from My CV
                   </>
                 )}
               </Button>

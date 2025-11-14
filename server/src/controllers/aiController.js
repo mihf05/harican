@@ -1,18 +1,41 @@
-import { OpenRouter } from '@openrouter/sdk';
 import { prisma } from '../lib/prisma.js';
 
-// Initialize OpenRouter client
-const apiKey = process.env.OPENROUTER_API_KEY || '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';
+// Initialize Gemini API
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyAF7NQxhs9F7YEOtqa0GmV9VJw5-wJLUgU';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
-console.log('🤖 Initializing OpenRouter with API key:', apiKey ? `${apiKey.substring(0, 15)}...` : 'NOT SET');
+console.log('🤖 Initializing Gemini with API key:', GEMINI_API_KEY ? `${GEMINI_API_KEY.substring(0, 15)}...` : 'NOT SET');
 
-const openRouter = new OpenRouter({
-  apiKey: apiKey,
-  defaultHeaders: {
-    'HTTP-Referer': process.env.SITE_URL || 'https://harican.vercel.app',
-    'X-Title': 'Harican - Career Assistant',
-  },
-});
+// Helper function to call Gemini API
+async function callGeminiAPI(messages) {
+  const prompt = messages.map(msg => {
+    if (msg.role === 'system') return `System Instructions: ${msg.content}`;
+    if (msg.role === 'user') return `User: ${msg.content}`;
+    if (msg.role === 'assistant') return `Assistant: ${msg.content}`;
+    return msg.content;
+  }).join('\n\n');
+
+  const response = await fetch(GEMINI_API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-goog-api-key': GEMINI_API_KEY
+    },
+    body: JSON.stringify({
+      contents: [{
+        parts: [{ text: prompt }]
+      }]
+    })
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error?.message || 'Gemini API request failed');
+  }
+
+  const data = await response.json();
+  return data.candidates[0].content.parts[0].text;
+}
 
 /**
  * Send a chat message to AI and get response
@@ -144,24 +167,19 @@ You can mention these specific opportunities to the user if relevant to their qu
       }
     }
 
-    // Call OpenRouter API with DeepSeek model
-    // Using deepseek-chat model (not the free variant to avoid policy issues)
-    console.log('🔄 Calling OpenRouter API with model: deepseek/deepseek-chat');
+    // Call Gemini API
+    console.log('🔄 Calling Gemini API with model: gemini-2.0-flash');
     console.log('📝 Message count:', messages.length);
     
-    const completion = await openRouter.chat.completions.create({
-      model: 'deepseek/deepseek-chat',
-      messages: messages,
-    });
+    const aiResponse = await callGeminiAPI(messages);
 
-    console.log('✅ OpenRouter response received');
-    const aiResponse = completion.choices[0].message.content;
+    console.log('✅ Gemini response received');
 
     res.json({
       success: true,
       data: {
         response: aiResponse,
-        model: 'deepseek/deepseek-chat',
+        model: 'gemini-2.0-flash',
         jobsFound: jobContext ? true : false
       }
     });
@@ -179,14 +197,14 @@ You can mention these specific opportunities to the user if relevant to their qu
     let errorMessage = 'Failed to get AI response';
     let statusCode = 500;
     
-    if (error.message?.includes('No endpoints found matching your data policy')) {
-      errorMessage = 'AI model is currently unavailable. This may be due to API configuration. Please check OpenRouter settings at https://openrouter.ai/settings/privacy';
-      statusCode = 503;
-      console.error('💡 Hint: You may need to configure your data policy on OpenRouter dashboard');
-    } else if (error.message?.includes('API key') || error.message?.includes('Unauthorized')) {
+    if (error.message?.includes('API key') || error.message?.includes('Unauthorized') || error.message?.includes('401')) {
       errorMessage = 'AI service authentication failed. Please check API key configuration.';
       statusCode = 503;
-      console.error('💡 Hint: Check that OPENROUTER_API_KEY environment variable is set correctly');
+      console.error('💡 Hint: Check that GEMINI_API_KEY environment variable is set correctly');
+    } else if (error.message?.includes('quota') || error.message?.includes('limit')) {
+      errorMessage = 'AI service quota exceeded. Please check your Gemini API quota.';
+      statusCode = 503;
+      console.error('💡 Hint: Check your API quota at https://console.cloud.google.com/');
     } else if (error.message?.includes('rate limit')) {
       errorMessage = 'AI service rate limit exceeded. Please try again in a moment.';
       statusCode = 429;
@@ -213,13 +231,24 @@ You can mention these specific opportunities to the user if relevant to their qu
  */
 export const extractSkillsFromCV = async (req, res) => {
   try {
-    const { cvText } = req.body;
+    // Get CV text from request body or user's profile
+    let { cvText } = req.body;
 
+    // If no CV text provided in request, fetch from user's profile
     if (!cvText || cvText.trim().length < 50) {
-      return res.status(400).json({
-        success: false,
-        message: 'CV text is required and must be at least 50 characters'
+      const userProfile = await prisma.user.findUnique({
+        where: { id: req.user.id },
+        select: { cvText: true }
       });
+
+      cvText = userProfile?.cvText;
+
+      if (!cvText || cvText.trim().length < 50) {
+        return res.status(400).json({
+          success: false,
+          message: 'No CV text found. Please update your profile with CV/resume content first.'
+        });
+      }
     }
 
     // Create prompt for skill extraction
@@ -257,17 +286,12 @@ INSTRUCTIONS:
 
 Return the JSON now:`;
 
-    const completion = await openRouter.chat.completions.create({
-      model: 'deepseek/deepseek-chat',
-      messages: [
-        {
-          role: 'user',
-          content: extractionPrompt
-        }
-      ],
-    });
-
-    const aiResponse = completion.choices[0].message.content;
+    const aiResponse = await callGeminiAPI([
+      {
+        role: 'user',
+        content: extractionPrompt
+      }
+    ]);
 
     // Parse JSON response
     let extractedData;
@@ -301,7 +325,7 @@ Return the JSON now:`;
       data: {
         ...extractedData,
         totalSkillsFound: extractedData.skills.length + extractedData.technologies.length,
-        extraction_method: 'AI-powered (DeepSeek)',
+        extraction_method: 'AI-powered (Google Gemini)',
         transparent_process: 'AI analyzed CV text and identified skills, technologies, and roles based on industry standards'
       }
     });

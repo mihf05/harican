@@ -1,13 +1,32 @@
-import { OpenRouter } from '@openrouter/sdk';
 import { prisma } from '../lib/prisma.js';
 
-const openRouter = new OpenRouter({
-  apiKey: process.env.OPENROUTER_API_KEY || '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',
-  defaultHeaders: {
-    'HTTP-Referer': process.env.SITE_URL || 'https://harican.vercel.app',
-    'X-Title': 'Harican - Career Assistant',
-  },
-});
+// Initialize Gemini API
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyAF7NQxhs9F7YEOtqa0GmV9VJw5-wJLUgU';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+
+// Helper function to call Gemini API
+async function callGeminiAPI(prompt) {
+  const response = await fetch(GEMINI_API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-goog-api-key': GEMINI_API_KEY
+    },
+    body: JSON.stringify({
+      contents: [{
+        parts: [{ text: prompt }]
+      }]
+    })
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error?.message || 'Gemini API request failed');
+  }
+
+  const data = await response.json();
+  return data.candidates[0].content.parts[0].text;
+}
 
 /**
  * Generate AI-powered career roadmap
@@ -104,13 +123,7 @@ GUIDELINES:
 
 Return ONLY valid JSON, no additional text.`;
 
-    const completion = await openRouter.chat.completions.create({
-      model: 'deepseek/deepseek-chat',
-      messages: [{ role: 'user', content: prompt }],
-      stream: false,
-    });
-
-    const aiResponse = completion.choices[0].message.content;
+    const aiResponse = await callGeminiAPI(prompt);
 
     // Parse JSON response
     let roadmapData;
