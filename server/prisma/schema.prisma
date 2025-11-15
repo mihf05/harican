@@ -43,6 +43,7 @@ model User {
   verifications Verification[]
   postedJobs  Job[]
   careerRoadmaps CareerRoadmap[]
+  jobApplications JobApplication[]
 
   @@map("users")
 }
@@ -96,8 +97,36 @@ model Job {
   isActive    Boolean  @default(true)
 
   postedBy User? @relation(fields: [postedById], references: [id], onDelete: SetNull)
+  jobApplications JobApplication[]
 
   @@map("jobs")
+}
+
+enum ApplicationStatus {
+  PENDING
+  REVIEWED
+  INTERVIEW_SCHEDULED
+  ACCEPTED
+  REJECTED
+  HIRED
+}
+
+model JobApplication {
+  id        String            @id @default(cuid())
+  userId    String
+  jobId     String
+  status    ApplicationStatus @default(PENDING)
+  appliedAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  interviewDate DateTime?
+  interviewNotes String?
+  rejectionReason String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  job  Job  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, jobId])
+  @@map("job_applications")
 }
 
 model LearningResource {

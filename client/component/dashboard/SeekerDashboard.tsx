@@ -124,31 +124,6 @@ export function SeekerDashboard({ data }: SeekerDashboardProps) {
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Job Match Overview */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
-            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-blue-600" />
-              Job Match Overview
-            </h3>
-            <div className="flex flex-col items-center justify-center h-[250px]">
-              <div className="text-center">
-                <div className="text-6xl font-bold text-blue-600 mb-2">
-                  {data.stats?.matchedJob || 0}
-                </div>
-                <p className="text-lg text-gray-600 dark:text-gray-400 mb-4">Jobs Matched to Your Profile</p>
-                <div className="grid grid-cols-2 gap-4 mt-6">
-                  <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-3">
-                    <div className="text-2xl font-bold text-blue-600">{data.stats?.totalJobs || 0}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Total Jobs</div>
-                  </div>
-                  <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-3">
-                    <div className="text-2xl font-bold text-green-600">{data.stats?.remoteJobs || 0}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Remote</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
 
           {/* Skills Chart */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">

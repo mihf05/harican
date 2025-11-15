@@ -3,7 +3,7 @@
 import { Input } from '@/component/ui/input'
 import { Label } from '@/component/ui/label'
 import { PhoneInput } from '@/component/ui/phone-input'
-import { User, Mail, Phone, GraduationCap, Briefcase, Target } from 'lucide-react'
+import { User, Mail, Phone, GraduationCap, Briefcase, Target, FileText } from 'lucide-react'
 
 interface BasicInformationProps {
   isEditing: boolean
@@ -163,6 +163,25 @@ export default function BasicInformation({ isEditing, profileData, onChange }: B
           ) : (
             <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <p className="text-gray-900 dark:text-white whitespace-pre-wrap">{profileData.bio || 'No bio provided'}</p>
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-2 md:col-span-2">
+          <Label htmlFor="cvText" className="text-sm font-semibold">CV Text</Label>
+          {isEditing ? (
+            <textarea
+              id="cvText"
+              value={profileData.cvText}
+              onChange={(e) => onChange('cvText', e.target.value)}
+              rows={6}
+              placeholder="Paste your CV text here for skill extraction and job matching..."
+              className="w-full px-4 py-2 border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:border-blue-500 shadow-sm resize-none"
+            />
+          ) : (
+            <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center gap-2">
+              <FileText className="h-4 w-4 text-gray-400" />
+              <p className="text-gray-900 dark:text-white whitespace-pre-wrap">{profileData.cvText || 'No CV text provided'}</p>
             </div>
           )}
         </div>
