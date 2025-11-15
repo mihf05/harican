@@ -410,8 +410,22 @@ export const jobController = {
   // Apply to a job
   async applyToJob(req, res) {
     try {
-      const userId = req.user.userId;
+      if (!req.user || !req.user.id) {
+        return res.status(401).json({
+          success: false,
+          message: 'Authentication required'
+        });
+      }
+
+      const userId = req.user.id;
       const jobId = req.params.id;
+
+      if (!jobId) {
+        return res.status(400).json({
+          success: false,
+          message: 'Job ID is required'
+        });
+      }
 
       // Check if job exists
       const job = await prisma.job.findUnique({
