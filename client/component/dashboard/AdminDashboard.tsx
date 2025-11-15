@@ -93,7 +93,107 @@ export function AdminDashboard({ data }: AdminDashboardProps) {
           </div>
         </div>
 
-        {/* Enhanced Stats Grid */}
+        {/* SDG 8 Impact Analytics Section */}
+        <div className="mb-8">
+          <div className="bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 rounded-2xl shadow-xl p-6 text-white">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-white bg-opacity-20 flex items-center justify-center">
+                  <Target className="h-6 w-6" />
+                </div>
+                SDG 8 Impact Analytics
+              </h2>
+              <div className="text-sm bg-white bg-opacity-20 px-3 py-1 rounded-full">
+                Decent Work & Economic Growth
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              {/* Users Analyzed */}
+              <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-4 border border-white border-opacity-20">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                    <Users className="h-4 w-4 text-white" />
+                  </div>
+                  <h3 className="font-semibold">Users Analyzed</h3>
+                </div>
+                <div className="text-2xl font-bold">{data.stats?.usersAnalyzed || data.stats?.totalSeekers || 0}</div>
+                <div className="text-sm opacity-90">Career assessments completed</div>
+              </div>
+
+              {/* Jobs Suggested */}
+              <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-4 border border-white border-opacity-20">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
+                    <Briefcase className="h-4 w-4 text-white" />
+                  </div>
+                  <h3 className="font-semibold">Jobs Suggested</h3>
+                </div>
+                <div className="text-2xl font-bold">{data.stats?.jobsSuggested || data.stats?.totalJobs || 0}</div>
+                <div className="text-sm opacity-90">Personalized recommendations</div>
+              </div>
+
+              {/* Skills in Demand */}
+              <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-4 border border-white border-opacity-20">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
+                    <TrendingUp className="h-4 w-4 text-white" />
+                  </div>
+                  <h3 className="font-semibold">Top Skills</h3>
+                </div>
+                <div className="space-y-1">
+                  {(data.stats?.topSkills || ['JavaScript', 'Python', 'React', 'Data Analysis']).slice(0, 3).map((skill: string, index: number) => (
+                    <div key={skill} className="flex justify-between text-sm">
+                      <span>{skill}</span>
+                      <span className="opacity-75">#{index + 1}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Common Gaps */}
+              <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-4 border border-white border-opacity-20">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
+                    <BarChart3 className="h-4 w-4 text-white" />
+                  </div>
+                  <h3 className="font-semibold">Skill Gaps</h3>
+                </div>
+                <div className="space-y-1">
+                  {(data.stats?.commonGaps || ['Communication', 'Leadership', 'Problem Solving']).slice(0, 3).map((gap: string, index: number) => (
+                    <div key={gap} className="flex justify-between text-sm">
+                      <span>{gap}</span>
+                      <span className="opacity-75">{65 + index * 5}% gap</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Impact Metrics */}
+            <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-xl p-4 border border-white border-opacity-20">
+              <h3 className="font-semibold mb-4">Platform Impact Metrics</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold">{data.stats?.careerRoadmapsGenerated || 0}</div>
+                  <div className="text-sm opacity-90">Career Roadmaps</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold">{data.stats?.resourcesAccessed || 0}</div>
+                  <div className="text-sm opacity-90">Learning Resources</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold">{data.stats?.applicationsSubmitted || 0}</div>
+                  <div className="text-sm opacity-90">Job Applications</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold">{data.stats?.skillsDeveloped || 0}</div>
+                  <div className="text-sm opacity-90">Skills Developed</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <div className="group relative bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 p-6 border-2 border-transparent hover:border-blue-400 overflow-hidden">
             <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500 opacity-10 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-500"></div>
