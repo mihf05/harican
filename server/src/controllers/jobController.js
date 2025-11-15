@@ -405,5 +405,72 @@ export const jobController = {
         error: error.message
       });
     }
+  },
+
+  // Apply to a job
+  async applyToJob(req, res) {
+    try {
+      const userId = req.user.userId;
+      const jobId = req.params.id;
+
+      // Check if job exists
+      const job = await prisma.job.findUnique({
+        where: { id: jobId }
+      });
+
+      if (!job) {
+        return res.status(404).json({
+          success: false,
+          message: 'Job not found'
+        });
+      }
+
+      if (!job.isActive) {
+        return res.status(400).json({
+          success: false,
+          message: 'This job is no longer active'
+        });
+      }
+
+      // Check if user has already applied
+      const existingApplication = await prisma.jobApplication.findFirst({
+        where: {
+          userId: userId,
+          jobId: jobId
+        }
+      });
+
+      if (existingApplication) {
+        return res.status(400).json({
+          success: false,
+          message: 'You have already applied to this job'
+        });
+      }
+
+      // Create job application
+      const application = await prisma.jobApplication.create({
+        data: {
+          userId: userId,
+          jobId: jobId,
+          status: 'PENDING'
+        }
+      });
+
+      res.status(201).json({
+        success: true,
+        message: 'Application submitted successfully',
+        data: {
+          applicationId: application.id,
+          message: 'Your application has been submitted'
+        }
+      });
+    } catch (error) {
+      console.error('Apply to job error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to apply to job',
+        error: error.message
+      });
+    }
   }
 };

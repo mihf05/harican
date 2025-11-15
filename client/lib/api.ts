@@ -342,6 +342,13 @@ export const jobsAPI = {
       method: 'DELETE',
     });
   },
+
+  // Apply to job (SEEKER only)
+  async applyToJob(id: string): Promise<ApiResponse<{ message: string; applicationId?: string }>> {
+    return apiRequest<{ message: string; applicationId?: string }>(`/api/jobs/${id}/apply`, {
+      method: 'POST',
+    });
+  },
 };
 
 // Resources API
@@ -543,6 +550,63 @@ export const roadmapAPI = {
   },
 };
 
+// Applications API
+export const applicationsAPI = {
+  // Get all applications for a specific job (POSTER/ADMIN only)
+  async getJobApplications(jobId: string): Promise<ApiResponse<any[]>> {
+    return apiRequest<any[]>(`/api/applications/job/${jobId}`);
+  },
+
+  // Get all applications for all poster's jobs
+  async getAllMyApplications(): Promise<ApiResponse<any[]>> {
+    return apiRequest<any[]>('/api/applications/my-applications');
+  },
+
+  // Get application statistics
+  async getApplicationStats(): Promise<ApiResponse<{
+    total: number;
+    pending: number;
+    reviewed: number;
+    interviewScheduled: number;
+    hired: number;
+    rejected: number;
+  }>> {
+    return apiRequest('/api/applications/stats');
+  },
+
+  // Update application status
+  async updateApplicationStatus(
+    applicationId: string, 
+    data: {
+      status: 'PENDING' | 'REVIEWED' | 'INTERVIEW_SCHEDULED' | 'ACCEPTED' | 'REJECTED' | 'HIRED';
+      interviewDate?: string;
+      interviewNotes?: string;
+      rejectionReason?: string;
+    }
+  ): Promise<ApiResponse<any>> {
+    return apiRequest(`/api/applications/${applicationId}/status`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  // Send interview invitation email
+  async sendInterviewInvitation(
+    applicationId: string,
+    data: {
+      interviewDate?: string;
+      interviewNotes?: string;
+      subject?: string;
+      message?: string;
+    }
+  ): Promise<ApiResponse<{ message: string }>> {
+    return apiRequest(`/api/applications/${applicationId}/interview-invitation`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+};
+
 // Export everything
 export default {
   auth: authAPI,
@@ -552,4 +616,5 @@ export default {
   dashboard: dashboardAPI,
   ai: aiAPI,
   roadmap: roadmapAPI,
+  applications: applicationsAPI,
 };

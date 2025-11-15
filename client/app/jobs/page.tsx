@@ -18,8 +18,11 @@ import {
   Filter,
   ExternalLink,
   DollarSign,
-  X
+  X,
+  Loader2
 } from "lucide-react";
+import { jobsAPI } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
 
 const jobs = [
   {
@@ -95,11 +98,17 @@ const jobs = [
 ];
 
 export default function JobsPage() {
+  const { user, isAuthenticated } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState("all");
   const [selectedExperience, setSelectedExperience] = useState("all");
   const [sortBy, setSortBy] = useState("recent");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [applyingJobId, setApplyingJobId] = useState<number | null>(null);
+  const [appliedJobs, setAppliedJobs] = useState<Set<number>>(new Set());
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState<"success" | "error">("success");
 
   const jobTypes = ["all", "Full-time", "Part-time", "Internship", "Freelance"];
   const experienceLevels = ["all", "Fresher", "Entry Level", "Junior", "Mid"];
@@ -135,8 +144,49 @@ export default function JobsPage() {
     );
   };
 
+  const handleApplyToJob = async (jobId: number) => {
+    if (!isAuthenticated) {
+      setToastMessage("Please login to apply for jobs");
+      setToastType("error");
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+      return;
+    }
+
+    setApplyingJobId(jobId);
+    try {
+      const response = await jobsAPI.applyToJob(jobId.toString());
+      if (response.success) {
+        setAppliedJobs(prev => new Set([...prev, jobId]));
+        setToastMessage("Application submitted successfully!");
+        setToastType("success");
+      } else {
+        setToastMessage(response.errors?.[0]?.message || "Failed to apply");
+        setToastType("error");
+      }
+    } catch (error: any) {
+      setToastMessage(error.message || "Failed to apply to job");
+      setToastType("error");
+    } finally {
+      setApplyingJobId(null);
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Toast Notification */}
+      {showToast && (
+        <div className={`fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all duration-300 ${
+          toastType === "success" 
+            ? "bg-green-500 text-white" 
+            : "bg-red-500 text-white"
+        }`}>
+          {toastMessage}
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <div className="text-center mb-12">
@@ -382,9 +432,28 @@ export default function JobsPage() {
                     </div>
 
                     <div className="flex flex-col gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
-                      <Button className="bg-blue-600 hover:bg-blue-700 text-white w-full">
-                        Apply Now
-                        <ExternalLink className="ml-2 h-4 w-4" />
+                      <Button 
+                        className={`w-full ${
+                          appliedJobs.has(job.id)
+                            ? "bg-green-600 hover:bg-green-700"
+                            : "bg-blue-600 hover:bg-blue-700"
+                        } text-white`}
+                        onClick={() => handleApplyToJob(job.id)}
+                        disabled={applyingJobId === job.id || appliedJobs.has(job.id)}
+                      >
+                        {applyingJobId === job.id ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Applying...
+                          </>
+                        ) : appliedJobs.has(job.id) ? (
+                          "✓ Applied"
+                        ) : (
+                          <>
+                            Apply Now
+                            <ExternalLink className="ml-2 h-4 w-4" />
+                          </>
+                        )}
                       </Button>
                       <Button variant="outline" className="w-full">
                         Save Job
