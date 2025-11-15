@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { Button } from "@/component/ui/button";
 import { 
   Briefcase, BookOpen, TrendingUp, MapPin, Target, Award, 
-  ExternalLink, CheckCircle2, ChevronRight, Zap, GraduationCap, User
+  ExternalLink, CheckCircle2, ChevronRight, Zap, GraduationCap, User, Building, Users
 } from "lucide-react";
 import Link from "next/link";
 import { 
@@ -47,7 +47,118 @@ export function SeekerDashboard({ data }: SeekerDashboardProps) {
           </div>
         </div>
 
-        {/* Enhanced Stats Cards with Gradient Borders */}
+        {/* Local Context & Real Impact Section */}
+        <div className="mb-8">
+          <div className="bg-gradient-to-r from-green-600 via-teal-600 to-blue-600 rounded-2xl shadow-xl p-6 text-white">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-white bg-opacity-20 flex items-center justify-center">
+                  <MapPin className="h-6 w-6" />
+                </div>
+                Local Opportunities & Impact
+              </h2>
+              <div className="text-sm bg-white bg-opacity-20 px-3 py-1 rounded-full">
+                SDG 8: Decent Work & Economic Growth
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+              {/* Government Programs */}
+              <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-4 border border-white border-opacity-20">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                    <Building className="h-4 w-4 text-white" />
+                  </div>
+                  <h3 className="font-semibold">Government Programs</h3>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-sm">
+                    <span className="font-medium">Skill India Mission:</span> Free training programs
+                  </div>
+                  <div className="text-sm">
+                    <span className="font-medium">PMKVY:</span> 1.4 lakh seats available
+                  </div>
+                  <div className="text-sm">
+                    <span className="font-medium">NSDC:</span> Sector skill councils
+                  </div>
+                </div>
+              </div>
+
+              {/* Local Job Boards */}
+              <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-4 border border-white border-opacity-20">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
+                    <Briefcase className="h-4 w-4 text-white" />
+                  </div>
+                  <h3 className="font-semibold">Local Job Boards</h3>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-sm">
+                    <span className="font-medium">Naukri.com:</span> 50k+ local jobs
+                  </div>
+                  <div className="text-sm">
+                    <span className="font-medium">Indeed India:</span> Entry-level positions
+                  </div>
+                  <div className="text-sm">
+                    <span className="font-medium">Local Startups:</span> Growing opportunities
+                  </div>
+                </div>
+              </div>
+
+              {/* Disadvantaged Groups Support */}
+              <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-4 border border-white border-opacity-20">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
+                    <Users className="h-4 w-4 text-white" />
+                  </div>
+                  <h3 className="font-semibold">Support Programs</h3>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-sm">
+                    <span className="font-medium">Women Empowerment:</span> 30% reservations
+                  </div>
+                  <div className="text-sm">
+                    <span className="font-medium">SC/ST Initiatives:</span> Special training programs
+                  </div>
+                  <div className="text-sm">
+                    <span className="font-medium">Rural Youth:</span> Skill development schemes
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-xl p-4 border border-white border-opacity-20">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold mb-2">Regional Focus Areas</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div className="text-center">
+                      <div className="font-bold text-lg">15k+</div>
+                      <div>Jobs in Maharashtra</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="font-bold text-lg">8k+</div>
+                      <div>Jobs in Karnataka</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="font-bold text-lg">12k+</div>
+                      <div>Jobs in Tamil Nadu</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="font-bold text-lg">6k+</div>
+                      <div>Jobs in Delhi NCR</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm opacity-90 mb-2">Economic Impact</div>
+                  <div className="text-2xl font-bold">₹2.1L Cr</div>
+                  <div className="text-sm opacity-90">Annual wage potential</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="group relative bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 p-6 border-2 border-transparent hover:border-blue-400 overflow-hidden">
             <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500 opacity-10 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-500"></div>
