@@ -121,15 +121,15 @@ export function SeekerDashboard({ data }: SeekerDashboardProps) {
                   <h3 className="font-semibold mb-2">Regional Focus Areas</h3>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div className="text-center">
-                      <div className="font-bold text-lg">{data.regionalStats?.dhaka || 25}k+</div>
+                      <div className="font-bold text-lg">{data.regionalStats?.dhaka || 25}+</div>
                       <div>Jobs in Dhaka</div>
                     </div>
                     <div className="text-center">
-                      <div className="font-bold text-lg">{data.regionalStats?.chittagong || 15}k+</div>
+                      <div className="font-bold text-lg">{data.regionalStats?.chittagong || 15}+</div>
                       <div>Jobs in Chittagong</div>
                     </div>
                     <div className="text-center">
-                      <div className="font-bold text-lg">{data.regionalStats?.khulna || 10}k+</div>
+                      <div className="font-bold text-lg">{data.regionalStats?.khulna || 10}+</div>
                       <div>Jobs in Khulna</div>
                     </div>
                     <div className="text-center">
@@ -140,7 +140,7 @@ export function SeekerDashboard({ data }: SeekerDashboardProps) {
                 </div>
                 <div className="text-right">
                   <div className="text-sm opacity-90 mb-2">Economic Impact</div>
-                  <div className="text-2xl font-bold">{data.localContext?.economicImpact}</div>
+                  <div className="text-sm font-bold">{data.localContext?.economicImpact}</div>
                   <div className="text-sm opacity-90">Annual wage potential</div>
                 </div>
               </div>
