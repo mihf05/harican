@@ -2,7 +2,7 @@
 import { useMediaQuery } from "@/hooks/use-media-query";
 import ThemeSwitch from "@/lib/theme";
 import { cn } from "@/lib/utils";
-import { AlignJustify, X, Briefcase, BookOpen, User, LogOut, LayoutDashboard, Plus, Home, Bot, MapIcon } from "lucide-react";
+import { AlignJustify, X, Briefcase, User, LogOut, LayoutDashboard, Plus, Home, Bot, MapIcon, FileText } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -26,9 +26,12 @@ export default function DashboardNavbar() {
   const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/jobs", label: "Find Jobs", icon: Briefcase },
-    { href: "/resources", label: "Resources", icon: BookOpen },
     { href: "/ai-assistant", label: "AI Assistant", icon: Bot },
     { href: "/roadmaps", label: "Career Roadmap", icon: MapIcon },
+    ...(user?.role === 'SEEKER' 
+      ? [{ href: "/applications", label: "My Applications", icon: FileText }] 
+      : []
+    ),
     ...(user?.role === 'POSTER' || user?.role === 'ADMIN' 
       ? [{ href: "/post-job", label: "Post Job", icon: Plus }] 
       : []

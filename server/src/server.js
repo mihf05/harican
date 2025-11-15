@@ -3,6 +3,7 @@ import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
 import cookieParser from 'cookie-parser'
+import { prisma } from './lib/prisma.js'
 import authRoutes from './routes/auth.js'
 import profileRoutes from './routes/profile.js'
 import jobRoutes from './routes/jobs.js'
@@ -11,6 +12,7 @@ import dashboardRoutes from './routes/dashboard.js'
 import aiRoutes from './routes/ai.js'
 import suggestionRoutes from './routes/suggestions.js'
 import roadmapRoutes from './routes/roadmap.js'
+import applicationRoutes from './routes/applications.js'
 
 dotenv.config()
 
@@ -71,6 +73,7 @@ app.use('/api/dashboard', dashboardRoutes)
 app.use('/api/ai', aiRoutes)
 app.use('/api/suggestions', suggestionRoutes)
 app.use('/api/roadmap', roadmapRoutes)
+app.use('/api/applications', applicationRoutes)
 
 // Global error handler
 app.use((error, req, res, next) => {
@@ -98,9 +101,17 @@ app.use('*', (req, res) => {
 })
 
 // Start server
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`🚀 Server is running on http://localhost:${PORT}`)
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`)
+})
+
+// Handle graceful shutdown
+process.on('SIGINT', async () => {
+  console.log('\n📴 Shutting down...')
+  await prisma.$disconnect()
+  server.close()
+  process.exit(0)
 })
 
 export default app
