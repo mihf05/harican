@@ -178,6 +178,53 @@ export const dashboardController = {
         const activeJobs = await prisma.job.count({ where: { isActive: true } });
         const totalResources = await prisma.learningResource.count();
 
+        // SDG 8 Impact Analytics
+        const usersAnalyzed = await prisma.user.count({
+          where: {
+            role: 'SEEKER',
+            OR: [
+              { skills: { some: {} } },
+              { careerRoadmaps: { some: {} } }
+            ]
+          }
+        });
+
+        const jobsSuggested = await prisma.job.count({ where: { isActive: true } }); // All active jobs are potentially suggested
+
+        // Get top skills in demand (from job requirements)
+        const allJobs = await prisma.job.findMany({
+          where: { isActive: true },
+          select: { skills: true }
+        });
+
+        const skillCounts = {};
+        allJobs.forEach(job => {
+          job.skills.forEach(skill => {
+            skillCounts[skill] = (skillCounts[skill] || 0) + 1;
+          });
+        });
+
+        const topSkills = Object.entries(skillCounts)
+          .sort(([,a], [,b]) => b - a)
+          .slice(0, 5)
+          .map(([skill]) => skill);
+
+        // Common skill gaps (skills required but users don't have)
+        const allUserSkills = await prisma.userSkill.findMany({
+          select: { skillName: true }
+        });
+
+        const userSkillSet = new Set(allUserSkills.map(us => us.skillName.toLowerCase()));
+        const commonGaps = topSkills.filter(skill =>
+          !userSkillSet.has(skill.toLowerCase())
+        ).slice(0, 3);
+
+        // Impact metrics
+        const careerRoadmapsGenerated = await prisma.careerRoadmap.count();
+        const resourcesAccessed = totalResources; // Approximation
+        const applicationsSubmitted = await prisma.jobApplication.count();
+        const skillsDeveloped = await prisma.userSkill.count();
+
         // Get recent jobs
         const recentJobs = await prisma.job.findMany({
           orderBy: { createdAt: 'desc' },
@@ -211,7 +258,16 @@ export const dashboardController = {
           totalPosters,
           totalJobs,
           activeJobs,
-          totalResources
+          totalResources,
+          // SDG 8 Analytics
+          usersAnalyzed,
+          jobsSuggested,
+          topSkills,
+          commonGaps,
+          careerRoadmapsGenerated,
+          resourcesAccessed,
+          applicationsSubmitted,
+          skillsDeveloped
         };
         dashboardData.recentJobs = recentJobs;
         dashboardData.recentUsers = recentUsers;

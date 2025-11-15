@@ -3,6 +3,9 @@
 Harican is a full-stack web application built with a **Node.js + Prisma backend** and a **frontend powered by Bun**.
 Follow the steps below to clone, install, and run the project.
 
+For AI  using gemini.
+model gemini-2.0-flash
+
 ---
 
 ## **📦 Project Setup**
