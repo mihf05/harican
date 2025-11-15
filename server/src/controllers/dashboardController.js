@@ -1,5 +1,40 @@
 import { prisma } from '../lib/prisma.js';
 
+// Initialize Gemini API
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyAF7NQxhs9F7YEOtqa0GmV9VJw5-wJLUgU';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+
+// Helper function to call Gemini API
+async function callGeminiAPI(messages) {
+  const prompt = messages.map(msg => {
+    if (msg.role === 'system') return `System Instructions: ${msg.content}`;
+    if (msg.role === 'user') return `User: ${msg.content}`;
+    if (msg.role === 'assistant') return `Assistant: ${msg.content}`;
+    return msg.content;
+  }).join('\n\n');
+
+  const response = await fetch(GEMINI_API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-goog-api-key': GEMINI_API_KEY
+    },
+    body: JSON.stringify({
+      contents: [{
+        parts: [{ text: prompt }]
+      }]
+    })
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error?.message || 'Gemini API request failed');
+  }
+
+  const data = await response.json();
+  return data.candidates[0].content.parts[0].text;
+}
+
 export const dashboardController = {
   // Get dashboard data for current user
   async getDashboard(req, res) {
@@ -145,6 +180,46 @@ export const dashboardController = {
           matchedJobs: recommendedJobs.length,
           totalSkills: userSkills.length
         };
+
+        // Get regional job statistics
+        const regionalStats = {
+          dhaka: await prisma.job.count({ where: { isActive: true, location: { contains: 'Dhaka', mode: 'insensitive' } } }),
+          chittagong: await prisma.job.count({ where: { isActive: true, location: { contains: 'Chittagong', mode: 'insensitive' } } }),
+          khulna: await prisma.job.count({ where: { isActive: true, location: { contains: 'Khulna', mode: 'insensitive' } } }),
+          rajshahi: await prisma.job.count({ where: { isActive: true, location: { contains: 'Rajshahi', mode: 'insensitive' } } }),
+        };
+
+        dashboardData.regionalStats = regionalStats;
+
+        // Generate local context data using Gemini
+        try {
+          const geminiPrompt = [
+            {
+              role: 'user',
+              content: `Provide current information about government programs, job boards, and support programs for job seekers in Bangladesh. Also include economic impact data. Format the response as valid JSON with the following structure:
+{
+  "governmentPrograms": [
+    {"name": "Program Name", "description": "Brief description"}
+  ],
+  "jobBoards": [
+    {"name": "Board Name", "description": "Brief description"}
+  ],
+  "supportPrograms": [
+    {"name": "Program Name", "description": "Brief description"}
+  ],
+  "economicImpact": "Economic impact string"
+}
+Only return the JSON, no additional text.`
+            }
+          ];
+
+          const geminiResponse = await callGeminiAPI(geminiPrompt);
+          const localContext = JSON.parse(geminiResponse.replace(/```json\n?|\n?```/g, '').trim());
+          dashboardData.localContext = localContext;
+        } catch (error) {
+          console.error('Failed to generate local context with Gemini:', error);
+          throw error; // Re-throw to fail the request if AI fails
+        }
 
       } else if (userRole === 'POSTER') {
         // Get jobs posted by this user

@@ -72,15 +72,11 @@ export function SeekerDashboard({ data }: SeekerDashboardProps) {
                   <h3 className="font-semibold">Government Programs</h3>
                 </div>
                 <div className="space-y-2">
-                  <div className="text-sm">
-                    <span className="font-medium">Skill India Mission:</span> Free training programs
-                  </div>
-                  <div className="text-sm">
-                    <span className="font-medium">PMKVY:</span> 1.4 lakh seats available
-                  </div>
-                  <div className="text-sm">
-                    <span className="font-medium">NSDC:</span> Sector skill councils
-                  </div>
+                  {data.localContext?.governmentPrograms?.map((program: any, index: number) => (
+                    <div key={index} className="text-sm">
+                      <span className="font-medium">{program.name}:</span> {program.description}
+                    </div>
+                  ))}
                 </div>
               </div>
 
@@ -93,15 +89,11 @@ export function SeekerDashboard({ data }: SeekerDashboardProps) {
                   <h3 className="font-semibold">Local Job Boards</h3>
                 </div>
                 <div className="space-y-2">
-                  <div className="text-sm">
-                    <span className="font-medium">Naukri.com:</span> 50k+ local jobs
-                  </div>
-                  <div className="text-sm">
-                    <span className="font-medium">Indeed India:</span> Entry-level positions
-                  </div>
-                  <div className="text-sm">
-                    <span className="font-medium">Local Startups:</span> Growing opportunities
-                  </div>
+                  {data.localContext?.jobBoards?.map((board: any, index: number) => (
+                    <div key={index} className="text-sm">
+                      <span className="font-medium">{board.name}:</span> {board.description}
+                    </div>
+                  ))}
                 </div>
               </div>
 
@@ -114,15 +106,11 @@ export function SeekerDashboard({ data }: SeekerDashboardProps) {
                   <h3 className="font-semibold">Support Programs</h3>
                 </div>
                 <div className="space-y-2">
-                  <div className="text-sm">
-                    <span className="font-medium">Women Empowerment:</span> 30% reservations
-                  </div>
-                  <div className="text-sm">
-                    <span className="font-medium">SC/ST Initiatives:</span> Special training programs
-                  </div>
-                  <div className="text-sm">
-                    <span className="font-medium">Rural Youth:</span> Skill development schemes
-                  </div>
+                  {data.localContext?.supportPrograms?.map((program: any, index: number) => (
+                    <div key={index} className="text-sm">
+                      <span className="font-medium">{program.name}:</span> {program.description}
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -133,26 +121,26 @@ export function SeekerDashboard({ data }: SeekerDashboardProps) {
                   <h3 className="font-semibold mb-2">Regional Focus Areas</h3>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div className="text-center">
-                      <div className="font-bold text-lg">15k+</div>
-                      <div>Jobs in Maharashtra</div>
+                      <div className="font-bold text-lg">{data.regionalStats?.dhaka || 25}k+</div>
+                      <div>Jobs in Dhaka</div>
                     </div>
                     <div className="text-center">
-                      <div className="font-bold text-lg">8k+</div>
-                      <div>Jobs in Karnataka</div>
+                      <div className="font-bold text-lg">{data.regionalStats?.chittagong || 15}k+</div>
+                      <div>Jobs in Chittagong</div>
                     </div>
                     <div className="text-center">
-                      <div className="font-bold text-lg">12k+</div>
-                      <div>Jobs in Tamil Nadu</div>
+                      <div className="font-bold text-lg">{data.regionalStats?.khulna || 10}k+</div>
+                      <div>Jobs in Khulna</div>
                     </div>
                     <div className="text-center">
-                      <div className="font-bold text-lg">6k+</div>
-                      <div>Jobs in Delhi NCR</div>
+                      <div className="font-bold text-lg">{data.regionalStats?.rajshahi || 8}+</div>
+                      <div>Jobs in Rajshahi</div>
                     </div>
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="text-sm opacity-90 mb-2">Economic Impact</div>
-                  <div className="text-2xl font-bold">₹2.1L Cr</div>
+                  <div className="text-2xl font-bold">{data.localContext?.economicImpact}</div>
                   <div className="text-sm opacity-90">Annual wage potential</div>
                 </div>
               </div>
