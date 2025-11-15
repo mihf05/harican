@@ -27,7 +27,7 @@ export const applicationController = {
   async getJobApplications(req, res) {
     try {
       const { jobId } = req.params;
-      const userId = req.user.userId;
+      const userId = req.user.id;
 
       // Verify job ownership
       const job = await prisma.job.findUnique({
@@ -94,7 +94,7 @@ export const applicationController = {
   // Get all applications for poster's jobs
   async getAllMyApplications(req, res) {
     try {
-      const userId = req.user.userId;
+      const userId = req.user.id;
 
       // Get all jobs posted by this user
       const jobs = await prisma.job.findMany({
@@ -144,7 +144,7 @@ export const applicationController = {
   async updateApplicationStatus(req, res) {
     try {
       const { applicationId } = req.params;
-      const userId = req.user.userId;
+      const userId = req.user.id;
       
       const validatedData = updateApplicationSchema.parse(req.body);
 
@@ -247,7 +247,7 @@ export const applicationController = {
     try {
       const { applicationId } = req.params;
       const { interviewDate, interviewNotes, subject, message } = req.body;
-      const userId = req.user.userId;
+      const userId = req.user.id;
 
       // Get application with details
       const application = await prisma.jobApplication.findUnique({
@@ -271,8 +271,11 @@ export const applicationController = {
         });
       }
 
-      // Verify job ownership
-      if (application.job.postedById !== userId && req.user.role !== 'ADMIN') {
+      // Verify job ownership - only allow job poster or admin
+      const isJobPoster = application.job.postedById && application.job.postedById === userId;
+      const isAdmin = req.user.role === 'ADMIN';
+      
+      if (!isJobPoster && !isAdmin) {
         return res.status(403).json({
           success: false,
           message: 'You do not have permission to send interview invitations'
@@ -333,7 +336,7 @@ ${application.job.company}
   // Get application statistics for poster
   async getApplicationStats(req, res) {
     try {
-      const userId = req.user.userId;
+      const userId = req.user.id;
 
       // Get all applications for user's jobs
       const applications = await prisma.jobApplication.findMany({
