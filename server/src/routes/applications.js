@@ -4,9 +4,9 @@ import { authenticate, authorize } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// All routes require authentication and POSTER/ADMIN role
+// All routes require authentication and SEEKER/POSTER/ADMIN role
 router.use(authenticate);
-router.use(authorize(['POSTER', 'ADMIN']));
+router.use(authorize(['SEEKER', 'POSTER', 'ADMIN']));
 
 // Get all applications for a specific job
 router.get('/job/:jobId', applicationController.getJobApplications);

@@ -7,21 +7,27 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAuth?: boolean;
   redirectTo?: string;
+  allowedRoles?: string[];
 }
 
 export function ProtectedRoute({ 
   children, 
   requireAuth = true,
-  redirectTo = "/login" 
+  redirectTo = "/login",
+  allowedRoles
 }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && requireAuth && !isAuthenticated) {
-      router.push(redirectTo);
+    if (!isLoading) {
+      if (requireAuth && !isAuthenticated) {
+        router.push(redirectTo);
+      } else if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+        router.push("/dashboard"); // or some unauthorized page
+      }
     }
-  }, [isAuthenticated, isLoading, requireAuth, redirectTo, router]);
+  }, [isAuthenticated, isLoading, requireAuth, redirectTo, router, allowedRoles, user]);
 
   if (isLoading) {
     return (
@@ -32,6 +38,10 @@ export function ProtectedRoute({
   }
 
   if (requireAuth && !isAuthenticated) {
+    return null;
+  }
+
+  if (allowedRoles && user && !allowedRoles.includes(user.role)) {
     return null;
   }
 

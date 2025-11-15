@@ -95,40 +95,69 @@ export const applicationController = {
   async getAllMyApplications(req, res) {
     try {
       const userId = req.user.id;
+      const userRole = req.user.role;
 
-      // Get all jobs posted by this user
-      const jobs = await prisma.job.findMany({
-        where: { postedById: userId },
-        include: {
-          jobApplications: {
-            include: {
-              user: {
-                select: {
-                  id: true,
-                  fullName: true,
-                  email: true,
-                  phone: true,
-                  educationLevel: true,
-                  experienceLevel: true,
-                  skills: {
-                    select: {
-                      skillName: true,
-                      level: true,
+      let data;
+
+      if (userRole === 'SEEKER') {
+        // For seekers: get their own applications
+        data = await prisma.jobApplication.findMany({
+          where: { userId },
+          include: {
+            job: {
+              select: {
+                id: true,
+                title: true,
+                company: true,
+                location: true,
+                isRemote: true,
+                jobType: true,
+                experienceLevel: true,
+                salary: true,
+                createdAt: true,
+              }
+            }
+          },
+          orderBy: {
+            appliedAt: 'desc'
+          }
+        });
+      } else {
+        // For posters/admins: get applications to their jobs
+        const jobs = await prisma.job.findMany({
+          where: { postedById: userId },
+          include: {
+            jobApplications: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    fullName: true,
+                    email: true,
+                    phone: true,
+                    educationLevel: true,
+                    experienceLevel: true,
+                    skills: {
+                      select: {
+                        skillName: true,
+                        level: true,
+                      }
                     }
                   }
                 }
+              },
+              orderBy: {
+                appliedAt: 'desc'
               }
-            },
-            orderBy: {
-              appliedAt: 'desc'
             }
           }
-        }
-      });
+        });
+        data = jobs;
+      }
 
       res.json({
         success: true,
-        data: jobs
+        data
       });
     } catch (error) {
       console.error('Get all applications error:', error);
