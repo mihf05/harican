@@ -196,7 +196,9 @@ export const dashboardController = {
           const geminiPrompt = [
             {
               role: 'user',
-              content: `Provide current information about government programs, job boards, and support programs for job seekers in Bangladesh. Also include economic impact data. Format the response as valid JSON with the following structure:
+              content: `Provide concise, current information about government programs, job boards, and support programs for job seekers in Bangladesh. Focus on the most relevant and active programs. Keep descriptions very brief (1-2 sentences max). Limit to 3-4 items per category. Include realistic economic impact data.
+
+Format the response as valid JSON with the following structure:
 {
   "governmentPrograms": [
     {"name": "Program Name", "description": "Brief description"}
